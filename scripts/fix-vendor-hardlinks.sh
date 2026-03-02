@@ -21,7 +21,12 @@ fi
 count=0
 for f in "$EXT_DIR"/*/openclaw.plugin.json "$EXT_DIR"/*/index.ts "$EXT_DIR"/*/package.json; do
   [ -f "$f" ] || continue
-  nlink=$(stat -f '%l' "$f" 2>/dev/null || stat -c '%h' "$f" 2>/dev/null)
+  # stat -c works on Linux/MSYS2(Git Bash), stat -f on macOS
+  if stat -c '%h' "$f" >/dev/null 2>&1; then
+    nlink=$(stat -c '%h' "$f")
+  else
+    nlink=$(stat -f '%l' "$f")
+  fi
   if [ "$nlink" -gt 1 ]; then
     cp "$f" "$f.tmp" && mv "$f.tmp" "$f"
     count=$((count + 1))
