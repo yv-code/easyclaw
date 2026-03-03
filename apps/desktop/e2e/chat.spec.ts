@@ -41,6 +41,11 @@ async function ensureSessionExists(window: import("@playwright/test").Page): Pro
 }
 
 test.describe("Chat Page — Comprehensive", () => {
+  // Electron fixture setup (launch, onboarding, seed, gateway connect) takes ~40s
+  // on Windows under 4-worker parallel load.  The default 60s leaves only ~20s for
+  // test body, which is insufficient for tests that send LLM messages (~30s) or
+  // wait for gateway reconnection (~30s).
+  test.describe.configure({ timeout: 90_000 });
 
   // ──────────────────────────────────────────────────────────────────
   // 1. Most error-prone (API-dependent, timing sensitive)
@@ -74,8 +79,8 @@ test.describe("Chat Page — Comprehensive", () => {
 
     // Gateway does full stop+start on model change.
     // Windows has no SIGUSR1 graceful reload — needs a full restart cycle,
-    // which can take slightly over 10s under load.
-    const reconnectTimeout = process.platform === "win32" ? 20_000 : 10_000;
+    // which can take >20s under 4-worker parallel load.
+    const reconnectTimeout = process.platform === "win32" ? 30_000 : 10_000;
     await connectedDot.waitFor({ state: "hidden", timeout: 5_000 });
     await expect(connectedDot).toBeVisible({ timeout: reconnectTimeout });
 

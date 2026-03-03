@@ -55,7 +55,12 @@ test.describe("LLM Providers", () => {
       // Validation timed out or failed transiently (e.g. 429 rate limit) — wait and retry
       if (attempt < 2) {
         await window.waitForTimeout(5_000);
-        // Clear error and re-enter key to retry
+        // Re-select the provider to reset the form and dismiss the error alert.
+        // Simply re-filling the key doesn't clear the visible error banner.
+        await form.locator(".provider-select-trigger").click();
+        await form.locator(".provider-select-option", { hasText: /Zhipu \(GLM\) - China/i }).click();
+        await form.locator(".custom-select-trigger").click();
+        await window.locator(".custom-select-option", { hasText: /GLM-4\.7-Flash/i }).click();
         await form.locator("input[type='password']").fill(zhipuKey!);
       }
     }

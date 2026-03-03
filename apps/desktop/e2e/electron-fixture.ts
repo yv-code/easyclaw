@@ -183,6 +183,21 @@ async function bringWindowToFront(electronApp: ElectronApplication) {
   });
 }
 
+/** Wait until a TCP port is accepting connections (up to `timeoutMs`). */
+async function waitForPort(port: number, timeoutMs = 30_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const listening = await new Promise<boolean>((resolve) => {
+      const sock = createConnection({ port, host: "127.0.0.1" });
+      sock.once("connect", () => { sock.destroy(); resolve(true); });
+      sock.once("error", () => resolve(false));
+    });
+    if (listening) return;
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error(`Port ${port} did not start listening within ${timeoutMs}ms`);
+}
+
 /** Seed a provider key via the gateway REST API. */
 async function seedProvider(apiBase: string, opts: {
   provider: string;
@@ -253,17 +268,27 @@ export const test = base.extend<ElectronFixtures>({
     if (await window.locator(".onboarding-page").isVisible()) {
       const apiKey = process.env.E2E_VOLCENGINE_API_KEY;
       if (apiKey) {
+        // Wait for the gateway to finish its initial startup before seeding.
+        // The seed triggers a full gateway stop+start (PUT /api/settings has
+        // no hint → handleProviderChange does launcher.stop()+start()).
+        // If we seed while the gateway is still in its initial startup, the
+        // restart interrupts it — under 4-worker parallel load this cascades
+        // past the 30 s fixture timeout.
+        const gwPort = parseInt(
+          await electronApp.evaluate(() => process.env.EASYCLAW_GATEWAY_PORT || "28789"),
+          10,
+        );
+        await waitForPort(gwPort);
+
         await seedProvider(apiBase, {
           provider: "volcengine",
           model: "doubao-seed-1-6-flash-250828",
           apiKey,
         });
-        // Provider seeding triggers gateway restarts (config + model change).
-        // On Windows each restart is a full stop+start (no SIGUSR1) — needs
-        // longer to settle. On macOS/Linux SIGUSR1 graceful reload is fast.
-        await window.waitForTimeout(process.platform === "win32" ? 10000 : 2000);
         // Reload to trigger onboarding re-check so the app transitions to
         // the main page now that a provider is configured.
+        // The gateway restarts after seeding (config + model change); the
+        // `.chat-status-dot-connected` wait below handles reconnection.
         await window.reload();
       } else {
         // No API key available — skip onboarding to reach the main page

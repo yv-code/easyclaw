@@ -32,6 +32,8 @@ test.describe("Chat Agent Events & Settings", () => {
   // ──────────────────────────────────────────────────────────────────
 
   test("Chat message triggers thinking indicator with agent phase", async ({ window, apiBase }) => {
+    // Fixture setup ~40s + gateway restart after provider switch ~30s + LLM response ~30s.
+    test.setTimeout(120_000);
     const apiKey = process.env.E2E_ZHIPU_API_KEY;
     test.skip(!apiKey, "E2E_ZHIPU_API_KEY required for chat flow test");
 
@@ -50,10 +52,15 @@ test.describe("Chat Agent Events & Settings", () => {
         body: JSON.stringify({ "llm-provider": "zhipu" }),
       });
     }, { base: apiBase, key: apiKey! });
-    // Wait for gateway to settle after provider switch
-    await window.waitForTimeout(3_000);
 
-    // Ensure we're on Chat page and connected
+    // The PUT /api/settings triggers a full gateway stop+start. Reload the page
+    // to force a fresh WebSocket connection — without this, the existing
+    // ".chat-status-dot-connected" still reflects the OLD gateway session,
+    // and the message would be sent into a gateway that is mid-restart.
+    await window.reload();
+    await window.waitForLoadState("domcontentloaded");
+
+    // Ensure we're on Chat page and connected to the NEW gateway
     const chatNav = window.locator(".nav-list .nav-btn").first();
     await chatNav.click();
     await expect(window.locator(".chat-status-dot-connected")).toBeVisible({ timeout: 30_000 });
@@ -92,6 +99,8 @@ test.describe("Chat Agent Events & Settings", () => {
   });
 
   test("Chat agent phase shows processing status when events enabled", async ({ window, apiBase }) => {
+    // Fixture setup ~40s + gateway restart after provider switch ~30s + LLM response ~30s.
+    test.setTimeout(120_000);
     const apiKey = process.env.E2E_ZHIPU_API_KEY;
     test.skip(!apiKey, "E2E_ZHIPU_API_KEY required for agent phase test");
 
@@ -110,9 +119,13 @@ test.describe("Chat Agent Events & Settings", () => {
         body: JSON.stringify({ "llm-provider": "zhipu" }),
       });
     }, { base: apiBase, key: apiKey! });
-    await window.waitForTimeout(3_000);
 
-    // Navigate to Chat page
+    // Reload to force a fresh WebSocket connection after provider switch
+    // (see first test in this block for detailed explanation).
+    await window.reload();
+    await window.waitForLoadState("domcontentloaded");
+
+    // Navigate to Chat page and wait for the NEW gateway connection
     const chatNav = window.locator(".nav-list .nav-btn").first();
     await chatNav.click();
     await expect(window.locator(".chat-status-dot-connected")).toBeVisible({ timeout: 30_000 });
