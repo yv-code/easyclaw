@@ -22,21 +22,6 @@ async function dismissModals(window: import("@playwright/test").Page) {
 }
 
 /**
- * Helper: wait for the session tab bar to appear.
- * On a fresh database with no messages, `sessions.list` returns 0 sessions
- * and the tab bar (SessionTabBar) won't render. Returns true if visible.
- */
-async function waitForTabBar(window: import("@playwright/test").Page, timeoutMs = 20_000): Promise<boolean> {
-  const tabBar = window.locator(".chat-session-tabs");
-  try {
-    await expect(tabBar).toBeVisible({ timeout: timeoutMs });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
  * Helper: send a short message and wait for the assistant response + tab bar.
  * This materializes a session on the gateway so the tab bar becomes visible.
  */
@@ -275,9 +260,7 @@ test.describe("Chat Page — Comprehensive", () => {
     test.skip(!process.env.E2E_VOLCENGINE_API_KEY, "E2E_VOLCENGINE_API_KEY required");
     await dismissModals(window);
     await expect(window.locator(".chat-status-dot-connected")).toBeVisible({ timeout: 30_000 });
-
-    const tabBarVisible = await waitForTabBar(window);
-    test.skip(!tabBarVisible, "Tab bar not visible (no sessions)");
+    await ensureSessionExists(window);
 
     const tabBar = window.locator(".chat-session-tabs");
 
@@ -298,9 +281,7 @@ test.describe("Chat Page — Comprehensive", () => {
     test.skip(!process.env.E2E_VOLCENGINE_API_KEY, "E2E_VOLCENGINE_API_KEY required");
     await dismissModals(window);
     await expect(window.locator(".chat-status-dot-connected")).toBeVisible({ timeout: 30_000 });
-
-    const tabBarVisible = await waitForTabBar(window);
-    test.skip(!tabBarVisible, "Tab bar not visible (no sessions)");
+    await ensureSessionExists(window);
 
     const tabBar = window.locator(".chat-session-tabs");
     const scrollArea = tabBar.locator(".chat-session-tabs-scroll");
@@ -327,9 +308,7 @@ test.describe("Chat Page — Comprehensive", () => {
     test.skip(!process.env.E2E_VOLCENGINE_API_KEY, "E2E_VOLCENGINE_API_KEY required");
     await dismissModals(window);
     await expect(window.locator(".chat-status-dot-connected")).toBeVisible({ timeout: 30_000 });
-
-    const tabBarVisible = await waitForTabBar(window);
-    test.skip(!tabBarVisible, "Tab bar not visible (no sessions)");
+    await ensureSessionExists(window);
 
     const tabBar = window.locator(".chat-session-tabs");
 
@@ -343,9 +322,7 @@ test.describe("Chat Page — Comprehensive", () => {
     test.skip(!process.env.E2E_VOLCENGINE_API_KEY, "E2E_VOLCENGINE_API_KEY required");
     await dismissModals(window);
     await expect(window.locator(".chat-status-dot-connected")).toBeVisible({ timeout: 30_000 });
-
-    const tabBarVisible = await waitForTabBar(window);
-    test.skip(!tabBarVisible, "Tab bar not visible (no sessions)");
+    await ensureSessionExists(window);
 
     const tabBar = window.locator(".chat-session-tabs");
 
@@ -380,9 +357,7 @@ test.describe("Chat Page — Comprehensive", () => {
     test.skip(!process.env.E2E_VOLCENGINE_API_KEY, "E2E_VOLCENGINE_API_KEY required");
     await dismissModals(window);
     await expect(window.locator(".chat-status-dot-connected")).toBeVisible({ timeout: 30_000 });
-
-    const tabBarVisible = await waitForTabBar(window);
-    test.skip(!tabBarVisible, "Tab bar not visible (no sessions)");
+    await ensureSessionExists(window);
 
     const tabBar = window.locator(".chat-session-tabs");
 
