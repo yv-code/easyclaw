@@ -214,14 +214,16 @@ export function ChannelsPage() {
               onChange={setSelectedDropdownChannel}
               placeholder={t("channels.selectChannel")}
               options={(() => {
-                const wecomOption = { value: "wecom", label: t("channels.channelWecom") };
+                // 微信客服暂时下线（企业微信号被封，暂停直接接入）
+                // const wecomOption = { value: "wecom", label: t("channels.channelWecom") };
                 const channelOptions = visibleChannels.map(ch => ({
                   value: ch.id,
                   label: t(ch.labelKey),
                 }));
-                return i18n.language === "zh"
-                  ? [wecomOption, ...channelOptions]
-                  : [...channelOptions, wecomOption];
+                return channelOptions;
+                // return i18n.language === "zh"
+                //   ? [wecomOption, ...channelOptions]
+                //   : [...channelOptions, wecomOption];
               })()}
               className="select-min-w-200"
             />
@@ -236,15 +238,16 @@ export function ChannelsPage() {
 
           {/* Tooltip and tutorial link for selected channel */}
           {selectedDropdownChannel && (() => {
-            if (selectedDropdownChannel === "wecom") {
-              return (
-                <div className="channel-info-box">
-                  <div className="channel-info-title">
-                    {t("channels.wecomDropdownHint")}
-                  </div>
-                </div>
-              );
-            }
+            // 微信客服暂时下线（企业微信号被封，暂停直接接入）
+            // if (selectedDropdownChannel === "wecom") {
+            //   return (
+            //     <div className="channel-info-box">
+            //       <div className="channel-info-title">
+            //         {t("channels.wecomDropdownHint")}
+            //       </div>
+            //     </div>
+            //   );
+            // }
 
             const selected = KNOWN_CHANNELS.find(ch => ch.id === selectedDropdownChannel);
             if (!selected) return null;
