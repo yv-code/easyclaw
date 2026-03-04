@@ -268,6 +268,7 @@ Module._resolveFilename=function(r,p,m,o){if(sdkPath){if(r==="openclaw/plugin-sd
 const origLoad=Module._load;
 Module._load=function(r,p,m){const s=performance.now();const res=origLoad.call(this,r,p,m);const d=performance.now()-s;if(!sdkPath&&/plugin-sdk[/\\\\]index\\.js$/.test(r)){try{sdkPath=origRes.call(Module,r,p,m);sdkDir=path.dirname(sdkPath);process.stderr.write("[startup-timer] plugin-sdk alias: "+sdkPath+"\\n")}catch{}}if(d>50)process.stderr.write("[startup-timer] +"+((performance.now()-t0)|0)+"ms require(\\""+r+"\\") took "+(d|0)+"ms\\n");return res};
 process.stderr.write("[startup-timer] +0ms preload executing\\n");
+const cc=process.env.NODE_COMPILE_CACHE;if(cc)process.stderr.write("[startup-timer] compile-cache: "+cc+"\\n");else process.stderr.write("[startup-timer] compile cache: DISABLED\\n");
 setImmediate(()=>process.stderr.write("[startup-timer] +"+(performance.now()-t0|0)+"ms event loop started\\n"));
 const ow=process.stdout.write;process.stdout.write=function(c,...a){if(String(c).includes("listening on"))process.stderr.write("[startup-timer] +"+(performance.now()-t0|0)+"ms gateway listening\\n");return ow.call(this,c,...a)};
 `,
