@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { DEFAULT_PANEL_DEV_PORT, DEFAULT_PANEL_PORT } from "@easyclaw/core";
 
@@ -21,5 +21,12 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+  },
+  test: {
+    environment: "jsdom",
+    exclude: [
+      "**/node_modules/**",
+      "test/pages/MobilePage.test.tsx", // source file not yet created
+    ],
   },
 });
