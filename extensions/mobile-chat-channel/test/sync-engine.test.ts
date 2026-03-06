@@ -2,11 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MobileSyncEngine } from "../src/sync-engine.js";
 import fs from "node:fs/promises";
 
-// Mock fs to avoid creating actual media directories during tests
+// Mock fs to avoid creating actual directories/files during tests
 vi.mock("node:fs/promises", () => ({
     default: {
         mkdir: vi.fn(),
-        writeFile: vi.fn()
+        writeFile: vi.fn(),
+        readFile: vi.fn().mockRejectedValue(new Error("ENOENT")),
     }
 }));
 
@@ -56,15 +57,19 @@ describe("MobileSyncEngine", () => {
         engine.stop();
     });
 
-    it("should initialize the media directory", () => {
+    it("should initialize directories", () => {
         expect(fs.mkdir).toHaveBeenCalledWith(
             expect.stringContaining("mobile"),
             { recursive: true }
         );
+        expect(fs.mkdir).toHaveBeenCalledWith(
+            expect.stringContaining("mobile-sync"),
+            { recursive: true }
+        );
     });
 
-    it("should register handler with transport on start", () => {
-        engine.start();
+    it("should register handler with transport on start", async () => {
+        await engine.start();
 
         expect(transport.registerHandler).toHaveBeenCalledWith(
             "pairing-1",
@@ -73,8 +78,8 @@ describe("MobileSyncEngine", () => {
         expect(transport.subscribeStatus).toHaveBeenCalled();
     });
 
-    it("should queue outgoing messages and send via transport", () => {
-        engine.start();
+    it("should queue outgoing messages and send via transport", async () => {
+        await engine.start();
 
         const msgId = engine.queueOutbound("mobile-dev-id", { type: "text", text: "Hello" });
 
@@ -90,7 +95,7 @@ describe("MobileSyncEngine", () => {
     });
 
     it("should send ACK when receiving a message from mobile", async () => {
-        engine.start();
+        await engine.start();
         transport.send.mockClear();
 
         const handler = transport._handlers.get("pairing-1");
@@ -109,7 +114,7 @@ describe("MobileSyncEngine", () => {
     });
 
     it("should save incoming images to disk", async () => {
-        engine.start();
+        await engine.start();
 
         const handler = transport._handlers.get("pairing-1");
         await handler({

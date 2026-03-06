@@ -155,7 +155,7 @@ const plugin = {
                         relayTransport?.leavePairing(engineKey);
                         maybeStopTransport();
                     };
-                    engine.start();
+                    await engine.start();
                     syncEngines.set(engineKey, engine);
                     console.log(`[MobileChat Plugin] SyncEngine created for ${engineKey}. Total engines: ${syncEngines.size}`);
                 }
