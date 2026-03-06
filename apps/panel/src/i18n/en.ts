@@ -792,6 +792,12 @@ export default {
   settings: {
     title: "Settings",
     description: "Configure application settings and preferences.",
+    app: {
+      title: "App Settings",
+      privacyMode: "Privacy Mode",
+      privacyModeHint: "Hide sensitive information like QR codes behind a blur. Useful for screen sharing or live streaming.",
+      clickToReveal: "Click to reveal",
+    },
     agent: {
       title: "Agent Settings",
       dmScope: "DM Session Scope",
@@ -809,6 +815,8 @@ export default {
       showAgentEventsHint: "Display what the agent is doing (processing, using tools, generating) while waiting for a response.",
       preserveToolEvents: "Preserve tool call records",
       preserveToolEventsHint: "Save tool call entries inline in the chat history so they remain visible after the conversation ends.",
+      collapseMessages: "Collapse long messages",
+      collapseMessagesHint: "Automatically collapse agent messages that exceed ~15 lines. You can still expand individual messages manually.",
       failedToSave: "Failed to save chat settings: ",
     },
     browser: {

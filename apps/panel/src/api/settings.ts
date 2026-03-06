@@ -124,6 +124,28 @@ export async function updateChatPreserveToolEvents(enabled: boolean): Promise<vo
   invalidateCache("settings");
 }
 
+export async function fetchChatCollapseMessages(): Promise<boolean> {
+  const settings = await fetchSettings();
+  return settings["chat_collapse_messages"] !== "false";
+}
+
+export async function updateChatCollapseMessages(enabled: boolean): Promise<void> {
+  await updateSettings({ chat_collapse_messages: enabled ? "true" : "false" });
+  invalidateCache("settings");
+}
+
+// --- Privacy Mode ---
+
+export async function fetchPrivacyMode(): Promise<boolean> {
+  const settings = await fetchSettings();
+  return settings["privacy_mode"] === "true";
+}
+
+export async function updatePrivacyMode(enabled: boolean): Promise<void> {
+  await updateSettings({ privacy_mode: enabled ? "true" : "false" });
+  invalidateCache("settings");
+}
+
 // --- Agent Settings (OpenClaw session-level config) ---
 
 export interface AgentSettings {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, useReducer } from "react";
 import { useTranslation } from "react-i18next";
-import { fetchGatewayInfo, fetchProviderKeys, trackEvent, fetchChatShowAgentEvents, fetchChatPreserveToolEvents } from "../api/index.js";
+import { fetchGatewayInfo, fetchProviderKeys, trackEvent, fetchChatShowAgentEvents, fetchChatPreserveToolEvents, fetchChatCollapseMessages } from "../api/index.js";
 import { formatError } from "@easyclaw/core";
 import { configManager } from "../lib/config-manager.js";
 import { Select } from "../components/Select.js";
@@ -39,6 +39,7 @@ export function ChatPage({ onAgentNameChange }: { onAgentNameChange?: (name: str
   const streaming = view.localStreaming;
   const [showAgentEvents, setShowAgentEvents] = useState(true);
   const [preserveToolEvents, setPreserveToolEvents] = useState(false);
+  const [collapseMessages, setCollapseMessages] = useState(true);
   const [chatExamplesExpanded, setChatExamplesExpanded] = useState(() => localStorage.getItem("chat-examples-collapsed") !== "1");
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const clientRef = useRef<GatewayChatClient | null>(null);
@@ -542,10 +543,12 @@ export function ChatPage({ onAgentNameChange }: { onAgentNameChange?: (name: str
       Promise.all([
         fetchChatShowAgentEvents().catch(() => true),
         fetchChatPreserveToolEvents().catch(() => false),
-      ]).then(([showEvents, preserveEvents]) => {
+        fetchChatCollapseMessages().catch(() => true),
+      ]).then(([showEvents, preserveEvents, collapse]) => {
         showAgentEventsRef.current = showEvents;
         setShowAgentEvents(showEvents);
         setPreserveToolEvents(preserveEvents);
+        setCollapseMessages(collapse);
       });
       // Refresh model label in case provider/model changed
       refreshModelLabel();
@@ -594,14 +597,16 @@ export function ChatPage({ onAgentNameChange }: { onAgentNameChange?: (name: str
 
     async function init() {
       try {
-        const [showEvents, preserveEvents] = await Promise.all([
+        const [showEvents, preserveEvents, collapse] = await Promise.all([
           fetchChatShowAgentEvents().catch(() => false),
           fetchChatPreserveToolEvents().catch(() => false),
+          fetchChatCollapseMessages().catch(() => true),
         ]);
         if (cancelled) return;
         showAgentEventsRef.current = showEvents;
         setShowAgentEvents(showEvents);
         setPreserveToolEvents(preserveEvents);
+        setCollapseMessages(collapse);
 
         const info = await fetchGatewayInfo();
         if (cancelled) return;
@@ -916,7 +921,7 @@ export function ChatPage({ onAgentNameChange }: { onAgentNameChange?: (name: str
                 </div>
               )}
               {cleaned && (msg.role === "assistant"
-                ? <CollapsibleContent><MarkdownMessage text={cleaned} /></CollapsibleContent>
+                ? <CollapsibleContent defaultCollapsed={collapseMessages}><MarkdownMessage text={cleaned} /></CollapsibleContent>
                 : cleaned)}
               {msg.role === "assistant" && cleaned && <CopyButton text={cleaned} />}
             </div>

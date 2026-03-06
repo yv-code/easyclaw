@@ -50,10 +50,10 @@ const COLLAPSE_THRESHOLD_PX = 336;
  * Wraps assistant message content and collapses it when taller than ~15 lines.
  * Uses CSS max-height + gradient fade for the collapsed state.
  */
-export function CollapsibleContent({ children }: { children: React.ReactNode }) {
+export function CollapsibleContent({ children, defaultCollapsed = true }: { children: React.ReactNode; defaultCollapsed?: boolean }) {
   const { t } = useTranslation();
   const contentRef = useRef<HTMLDivElement>(null);
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [needsCollapse, setNeedsCollapse] = useState(false);
 
   useLayoutEffect(() => {

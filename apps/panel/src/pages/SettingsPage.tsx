@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { fetchTelemetrySetting, updateTelemetrySetting, trackEvent, fetchAgentSettings, updateAgentSettings, fetchChatShowAgentEvents, updateChatShowAgentEvents, fetchChatPreserveToolEvents, updateChatPreserveToolEvents, fetchBrowserMode, updateBrowserMode, fetchAutoLaunchSetting, updateAutoLaunchSetting, fetchOpenClawStateDir, updateOpenClawStateDir, resetOpenClawStateDir } from "../api/index.js";
+import { fetchTelemetrySetting, updateTelemetrySetting, trackEvent, fetchAgentSettings, updateAgentSettings, fetchChatShowAgentEvents, updateChatShowAgentEvents, fetchChatPreserveToolEvents, updateChatPreserveToolEvents, fetchChatCollapseMessages, updateChatCollapseMessages, fetchBrowserMode, updateBrowserMode, fetchAutoLaunchSetting, updateAutoLaunchSetting, fetchOpenClawStateDir, updateOpenClawStateDir, resetOpenClawStateDir, fetchPrivacyMode, updatePrivacyMode } from "../api/index.js";
 import type { OpenClawStateDirInfo } from "../api/index.js";
 import { Select } from "../components/Select.js";
 import { ConfirmDialog } from "../components/ConfirmDialog.js";
@@ -38,11 +38,13 @@ export function SettingsPage() {
   const [dmScope, setDmScope] = useState("main");
   const [showAgentEvents, setShowAgentEvents] = useState(false);
   const [preserveToolEvents, setPreserveToolEvents] = useState(false);
+  const [collapseMessages, setCollapseMessages] = useState(true);
   const [autoLaunchEnabled, setAutoLaunchEnabled] = useState(false);
   const [browserMode, setBrowserMode] = useState<"standalone" | "cdp">("standalone");
   const [cdpConfirmOpen, setCdpConfirmOpen] = useState(false);
   const [dataDirInfo, setDataDirInfo] = useState<OpenClawStateDirInfo | null>(null);
   const [dataDirRestartNeeded, setDataDirRestartNeeded] = useState(false);
+  const [privacyMode, setPrivacyMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,22 +56,26 @@ export function SettingsPage() {
   async function loadSettings() {
     try {
       setLoading(true);
-      const [enabled, agentSettings, chatEvents, toolEvents, curBrowserMode, autoLaunch, dirInfo] = await Promise.all([
+      const [enabled, agentSettings, chatEvents, toolEvents, collapse, curBrowserMode, autoLaunch, dirInfo, privacy] = await Promise.all([
         fetchTelemetrySetting(),
         fetchAgentSettings(),
         fetchChatShowAgentEvents(),
         fetchChatPreserveToolEvents(),
+        fetchChatCollapseMessages(),
         fetchBrowserMode(),
         fetchAutoLaunchSetting(),
         fetchOpenClawStateDir(),
+        fetchPrivacyMode(),
       ]);
       setTelemetryEnabled(enabled);
       setDmScope(agentSettings.dmScope);
       setShowAgentEvents(chatEvents);
       setPreserveToolEvents(toolEvents);
+      setCollapseMessages(collapse);
       setBrowserMode(curBrowserMode);
       setAutoLaunchEnabled(autoLaunch);
       setDataDirInfo(dirInfo);
+      setPrivacyMode(privacy);
       setError(null);
     } catch (err) {
       setError(t("settings.agent.failedToLoad") + String(err));
@@ -125,6 +131,22 @@ export function SettingsPage() {
     }
   }
 
+  async function handleToggleCollapseMessages(enabled: boolean) {
+    const previous = collapseMessages;
+    setCollapseMessages(enabled);
+    try {
+      setSaving(true);
+      setError(null);
+      await updateChatCollapseMessages(enabled);
+      window.dispatchEvent(new CustomEvent("chat-settings-changed"));
+    } catch (err) {
+      setError(t("settings.chat.failedToSave") + String(err));
+      setCollapseMessages(previous);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleToggleTelemetry(enabled: boolean) {
     try {
       setSaving(true);
@@ -150,6 +172,22 @@ export function SettingsPage() {
     } catch (err) {
       setError(t("settings.autoLaunch.failedToSave") + String(err));
       setAutoLaunchEnabled(previous);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleTogglePrivacyMode(enabled: boolean) {
+    const previous = privacyMode;
+    setPrivacyMode(enabled);
+    try {
+      setSaving(true);
+      setError(null);
+      await updatePrivacyMode(enabled);
+      window.dispatchEvent(new CustomEvent("privacy-settings-changed"));
+    } catch (err) {
+      setError(t("settings.app.title") + ": " + String(err));
+      setPrivacyMode(previous);
     } finally {
       setSaving(false);
     }
@@ -293,6 +331,31 @@ export function SettingsPage() {
           </div>
           <div className="form-hint">
             {t("settings.chat.preserveToolEventsHint")}
+          </div>
+        </div>
+
+        <div className="settings-toggle-card">
+          <div className="settings-toggle-label">
+            <span>{t("settings.chat.collapseMessages")}</span>
+            <ToggleSwitch checked={collapseMessages} onChange={handleToggleCollapseMessages} disabled={saving} />
+          </div>
+          <div className="form-hint">
+            {t("settings.chat.collapseMessagesHint")}
+          </div>
+        </div>
+      </div>
+
+      {/* App Settings Section */}
+      <div className="section-card">
+        <h3>{t("settings.app.title")}</h3>
+
+        <div className="settings-toggle-card">
+          <div className="settings-toggle-label">
+            <span>{t("settings.app.privacyMode")}</span>
+            <ToggleSwitch checked={privacyMode} onChange={handleTogglePrivacyMode} disabled={saving} />
+          </div>
+          <div className="form-hint">
+            {t("settings.app.privacyModeHint")}
           </div>
         </div>
       </div>

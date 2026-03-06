@@ -792,6 +792,12 @@ export default {
   settings: {
     title: "设置",
     description: "配置应用程序设置和偏好。",
+    app: {
+      title: "应用设置",
+      privacyMode: "隐私模式",
+      privacyModeHint: "隐藏敏感信息（如二维码），适合直播或屏幕共享时使用。",
+      clickToReveal: "点击显示",
+    },
     agent: {
       title: "智能体设置",
       dmScope: "私信会话隔离",
@@ -809,6 +815,8 @@ export default {
       showAgentEventsHint: "在等待回复时显示代理正在做什么（处理中、使用工具、生成回复）。",
       preserveToolEvents: "保留工具调用记录",
       preserveToolEventsHint: "在聊天记录中内联保存工具调用条目，使其在对话结束后仍然可见。",
+      collapseMessages: "折叠过长消息",
+      collapseMessagesHint: "自动折叠超过约 15 行的代理消息。仍可手动展开单条消息。",
       failedToSave: "保存聊天设置失败：",
     },
     browser: {
