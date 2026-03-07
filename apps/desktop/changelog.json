@@ -1,5 +1,25 @@
 [
   {
+    "version": "1.6.2",
+    "date": "2026-03-06",
+    "en": [
+      "Fix mobile chat streaming — messages now arrive in real-time",
+      "Fix mobile session reset with proper transcript archiving",
+      "Fix message delivery recovery for tool-sent messages",
+      "Add component-level telemetry tracking across all panel pages",
+      "Add diagnostic logs for silent Windows gateway crashes",
+      "Improve mobile peer routing and channel allowlist UI"
+    ],
+    "zh": [
+      "修复手机聊天流式传输 — 消息现在实时到达",
+      "修复手机会话重置，正确归档聊天记录",
+      "修复工具发送的消息投递丢失问题",
+      "面板各页面新增组件级遥测追踪",
+      "新增 Windows 网关静默崩溃诊断日志",
+      "优化手机端对等路由和频道允许列表界面"
+    ]
+  },
+  {
     "version": "1.6.1",
     "date": "2026-03-06",
     "en": [
