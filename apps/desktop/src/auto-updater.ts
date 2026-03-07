@@ -1,6 +1,6 @@
 import { formatError } from "@easyclaw/core";
 import { createLogger } from "@easyclaw/logger";
-import { app, Notification } from "electron";
+import { app, Notification, shell } from "electron";
 import type { BrowserWindow } from "electron";
 import { autoUpdater } from "electron-updater";
 import type { UpdateInfo, ProgressInfo } from "electron-updater";
@@ -197,6 +197,26 @@ export function createAutoUpdater(deps: AutoUpdaterDeps) {
     }
     if (updateDownloadState.status === "ready") {
       log.info("Update already downloaded, ignoring duplicate request");
+      return;
+    }
+
+    // macOS: code signing certificate not yet available, so electron-updater's
+    // download/install flow will fail.  Fall back to opening the browser so the
+    // user can download the DMG manually.
+    // TODO: remove this block once Apple developer certificate is approved.
+    if (process.platform === "darwin") {
+      const file = latestUpdateInfo.files.find(f => f.url.endsWith(".dmg"));
+      const fileName = file?.url ?? `EasyClaw-${latestUpdateInfo.version}-universal.dmg`;
+      const downloadUrl = `${updateFeedUrl}/${fileName}`;
+      log.info(`macOS: opening browser for update download: ${downloadUrl}`);
+      shell.openExternal(downloadUrl);
+      const isZh = deps.systemLocale === "zh";
+      new Notification({
+        title: isZh ? "EasyClaw 更新" : "EasyClaw Update",
+        body: isZh
+          ? "已在浏览器中打开下载链接，下载完成后请手动安装。"
+          : "Download opened in browser. Install the DMG after downloading.",
+      }).show();
       return;
     }
 
