@@ -6,6 +6,8 @@
       "Fix mobile chat streaming — messages now arrive in real-time",
       "Fix mobile session reset with proper transcript archiving",
       "Fix message delivery recovery for tool-sent messages",
+      "Mac: fall back to browser download while Apple developer cert is pending",
+      "Fix packaged builds: inline relay constants in mobile-chat-channel",
       "Add component-level telemetry tracking across all panel pages",
       "Add diagnostic logs for silent Windows gateway crashes",
       "Improve mobile peer routing and channel allowlist UI"
@@ -14,6 +16,8 @@
       "修复手机聊天流式传输 — 消息现在实时到达",
       "修复手机会话重置，正确归档聊天记录",
       "修复工具发送的消息投递丢失问题",
+      "Mac 端：Apple 开发者证书审核中，暂时引导浏览器下载",
+      "修复打包后手机聊天插件 relay 常量丢失的问题",
       "面板各页面新增组件级遥测追踪",
       "新增 Windows 网关静默崩溃诊断日志",
       "优化手机端对等路由和频道允许列表界面"
