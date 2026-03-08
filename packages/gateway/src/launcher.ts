@@ -366,7 +366,11 @@ const ow=process.stdout.write;process.stdout.write=function(c,...a){if(String(c)
       hasOutput = true;
       const lines = data.toString().trim().split("\n");
       for (const line of lines) {
-        log.warn(`[gateway stderr] ${line}`);
+        if (line.startsWith("[startup-timer]")) {
+          log.debug(`[gateway stderr] ${line}`);
+        } else {
+          log.warn(`[gateway stderr] ${line}`);
+        }
       }
     });
 

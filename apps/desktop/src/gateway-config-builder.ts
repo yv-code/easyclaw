@@ -106,6 +106,7 @@ export function createGatewayConfigBuilder(deps: GatewayConfigDeps) {
           "search-browser-fallback",
           "google-gemini-cli-auth",
           "mobile-chat-channel",
+          "memory-core",
         ],
       },
       enableGeminiCliAuth: isGeminiOAuthActive(),
