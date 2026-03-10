@@ -1,5 +1,17 @@
 [
   {
+    "version": "1.6.5",
+    "date": "2026-03-10",
+    "en": [
+      "Fix Windows console UTF-8 encoding for non-ASCII filenames in exec",
+      "Bundle volcengine-stt-cli into packaged app"
+    ],
+    "zh": [
+      "修复 Windows 控制台中文文件名乱码问题",
+      "修复火山引擎语音识别组件未打包的问题"
+    ]
+  },
+  {
     "version": "1.6.4",
     "date": "2026-03-10",
     "en": [
