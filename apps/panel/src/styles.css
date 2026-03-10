@@ -2000,7 +2000,7 @@ tbody td {
 .channel-selector-col {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 12px;
 }
 
@@ -2028,9 +2028,56 @@ tbody td {
   border-radius: var(--radius-sm);
   font-size: 13px;
   line-height: 1.6;
-  min-width: 400px;
-  max-width: 600px;
+  max-width: 420px;
   text-align: left;
+}
+
+/* Mobile QR two-column layout (selector left, QR right) */
+.channel-selector-col--mobile {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.channel-selector-col--mobile .channel-selector-right {
+  flex: 0 1 auto;
+}
+
+.channel-selector-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-qr-container.mobile-qr-inline-img {
+  margin: 0;
+  padding: 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.mobile-qr-inline-placeholder {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-alt);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.mobile-qr-inline-error {
+  padding: 8px 12px;
+  background-color: var(--color-danger-bg, rgba(220, 38, 38, 0.08));
+  color: var(--color-danger);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 12px;
 }
 
 .channel-info-title {

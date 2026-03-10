@@ -672,7 +672,10 @@ export default {
     codeExpiredHint: "点击二维码刷新获取新的配对码。",
     clickToRefresh: "点击刷新",
     expiresIn: "{{seconds}}秒后过期",
-    existingPairings: "已有 {{count}} 台设备配对。"
+    existingPairings: "已有 {{count}} 台设备配对。",
+    pairTitle: "配对设备",
+    installHint: "首次添加请扫描右侧二维码打开爪聊，并根据提示完成添加到桌面的操作；如已安装，请点击「连接」按钮，然后用爪聊的扫码功能扫描弹窗中的二维码进行配对。",
+    pairHint: "打开爪聊 App，使用内置扫码功能扫描此二维码完成配对。"
   },
   permissions: {
     title: "文件权限",

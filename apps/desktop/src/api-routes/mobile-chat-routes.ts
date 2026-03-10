@@ -104,6 +104,22 @@ export async function handleMobileChatRoutes(
         return true;
     }
 
+    // Two-step pairing: get PWA install URL (Step 1, no pairing code needed)
+    if (pathname === "/api/mobile/install-url" && req.method === "GET") {
+        if (!ctx.mobileManager) {
+            sendJson(res, 500, { error: "Mobile Manager not initialized" });
+            return true;
+        }
+
+        try {
+            const result = await ctx.mobileManager.getInstallUrl();
+            sendJson(res, 200, result);
+        } catch (err: any) {
+            sendJson(res, 500, { error: err.message || "Failed to get install URL" });
+        }
+        return true;
+    }
+
     // W16-A1: Get Pairing Status (returns all pairings)
     if (pathname === "/api/mobile/status" && req.method === "GET") {
         if (!ctx.mobileManager) {

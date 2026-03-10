@@ -4,6 +4,7 @@ import { deleteChannelAccount, trackEvent, type ChannelAccountSnapshot } from ".
 import { pollGatewayReady } from "../lib/poll-gateway.js";
 import { AddChannelAccountModal } from "../components/AddChannelAccountModal.js";
 import { MobileBindingModal } from "../components/MobileBindingModal.js";
+import { MobileQrInlineFlow } from "../components/MobileQrInlineFlow.js";
 import { ConfirmDialog } from "../components/ConfirmDialog.js";
 import { Select } from "../components/Select.js";
 import { KNOWN_CHANNELS, getVisibleChannels, buildAccountsList } from "./channels/channel-defs.jsx";
@@ -47,6 +48,7 @@ export function ChannelsPage() {
   const handleMobileBindingSuccess = useCallback(() => {
     loadChannelStatus();
     setMobileModalOpen(false);
+    setSelectedDropdownChannel("");
   }, []);
 
   function handleAddAccountFromDropdown() {
@@ -55,7 +57,6 @@ export function ChannelsPage() {
     // Mobile Chat uses its own binding modal (QR code flow)
     if (selectedDropdownChannel === "mobile") {
       setMobileModalOpen(true);
-      setSelectedDropdownChannel("");
       return;
     }
 
@@ -215,55 +216,70 @@ export function ChannelsPage() {
       {/* Add Account Section */}
       <div className="section-card channel-add-section">
         <h3>{t("channels.addAccount")}</h3>
-        <div className="channel-selector-col">
-          <div className="channel-selector-row">
-            <label className="channel-selector-label">
-              {t("channels.selectChannelType")}
-            </label>
-            <Select
-              value={selectedDropdownChannel}
-              onChange={setSelectedDropdownChannel}
-              placeholder={t("channels.selectChannel")}
-              options={visibleChannels.map(ch => ({
-                value: ch.id,
-                label: t(ch.labelKey),
-              }))}
-              className="select-min-w-200"
-            />
-            <button
-              className="btn btn-primary"
-              onClick={handleAddAccountFromDropdown}
-              disabled={!selectedDropdownChannel}
-            >
-              {t("channels.connectBtn")}
-            </button>
-          </div>
+        <div className={`channel-selector-col${selectedDropdownChannel === "mobile" ? " channel-selector-col--mobile" : ""}`}>
+          {/* Left column: selector row + tooltip */}
+          <div className="channel-selector-right">
+            <div className="channel-selector-row">
+              <label className="channel-selector-label">
+                {t("channels.selectChannelType")}
+              </label>
+              <Select
+                value={selectedDropdownChannel}
+                onChange={setSelectedDropdownChannel}
+                placeholder={t("channels.selectChannel")}
+                options={visibleChannels.map(ch => ({
+                  value: ch.id,
+                  label: t(ch.labelKey),
+                }))}
+                className="select-min-w-200"
+              />
+              <button
+                className="btn btn-primary"
+                onClick={handleAddAccountFromDropdown}
+                disabled={!selectedDropdownChannel}
+              >
+                {t("channels.connectBtn")}
+              </button>
+            </div>
 
-          {/* Tooltip and tutorial link for selected channel */}
-          {selectedDropdownChannel && (() => {
-            const selected = KNOWN_CHANNELS.find(ch => ch.id === selectedDropdownChannel);
-            if (!selected) return null;
-
-            return (
+            {/* Tooltip for mobile or other channels */}
+            {selectedDropdownChannel === "mobile" && (
               <div className="channel-info-box">
                 <div className="channel-info-title">
-                  {t(selected.tooltip)}
+                  {t("mobile.installHint")}
                 </div>
-                {selected.tutorialUrl && (
-                  <div>
-                    <a
-                      href={selected.tutorialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium"
-                    >
-                      {t("channels.viewTutorial")} &rarr;
-                    </a>
-                  </div>
-                )}
               </div>
-            );
-          })()}
+            )}
+            {selectedDropdownChannel && selectedDropdownChannel !== "mobile" && (() => {
+              const selected = KNOWN_CHANNELS.find(ch => ch.id === selectedDropdownChannel);
+              if (!selected) return null;
+
+              return (
+                <div className="channel-info-box">
+                  <div className="channel-info-title">
+                    {t(selected.tooltip)}
+                  </div>
+                  {selected.tutorialUrl && (
+                    <div>
+                      <a
+                        href={selected.tutorialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium"
+                      >
+                        {t("channels.viewTutorial")} &rarr;
+                      </a>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* QR code (right side, only when mobile is selected) */}
+          {selectedDropdownChannel === "mobile" && (
+            <MobileQrInlineFlow />
+          )}
         </div>
       </div>
 

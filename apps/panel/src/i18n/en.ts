@@ -672,7 +672,10 @@ export default {
     codeExpiredHint: "Click the QR code to generate a new pairing code.",
     clickToRefresh: "Click to refresh",
     expiresIn: "Expires in {{seconds}}s",
-    existingPairings: "{{count}} device(s) already paired."
+    existingPairings: "{{count}} device(s) already paired.",
+    pairTitle: "Pair Device",
+    installHint: "First time? Scan the QR code on the right to install ChatClaw on your phone. Already installed? Click the Connect button, then scan the popup QR code using ChatClaw's built-in scanner to pair.",
+    pairHint: "Open the ChatClaw app and use its built-in scanner to scan this QR code."
   },
   permissions: {
     title: "File Permissions",

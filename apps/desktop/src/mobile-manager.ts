@@ -98,9 +98,54 @@ export class MobileManager {
                 expiresAt: Date.now() + PAIRING_CODE_TTL_MS,
             };
 
-            return { code: data.code, ...(data.qrUrl ? { qrUrl: data.qrUrl } : {}) };
+            return {
+                code: data.code,
+                ...(data.qrUrl ? { qrUrl: data.qrUrl } : {}),
+            };
         } catch (error) {
             log.error("Error requesting pairing code:", error);
+            throw error;
+        }
+    }
+
+    /**
+     * Fetch just the PWA install URL from the control plane, without generating a pairing code.
+     * Used for Step 1 of the two-step pairing flow.
+     */
+    public async getInstallUrl(): Promise<{ installUrl: string }> {
+        try {
+            const response = await fetch(`${this.controlPlaneUrl}/graphql`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    query: `query GetInstallUrl {
+  mobileInstallUrl
+}`,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to get install URL: ${response.statusText}`);
+            }
+
+            const json = await response.json() as {
+                data?: { mobileInstallUrl: string };
+                errors?: Array<{ message: string }>;
+            };
+
+            if (json.errors?.length) {
+                throw new Error(`GraphQL error: ${json.errors[0].message}`);
+            }
+
+            if (!json.data?.mobileInstallUrl) {
+                throw new Error("Failed to get install URL: no data in response");
+            }
+
+            return { installUrl: json.data.mobileInstallUrl };
+        } catch (error) {
+            log.error("Error fetching install URL:", error);
             throw error;
         }
     }

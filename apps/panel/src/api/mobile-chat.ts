@@ -24,6 +24,12 @@ export async function generateMobilePairingCode(): Promise<{ code?: string; qrUr
     });
 }
 
+export async function getInstallUrl(): Promise<{ installUrl?: string; error?: string }> {
+    return await fetchJson<{ installUrl?: string; error?: string }>("/mobile/install-url", {
+        method: "GET"
+    });
+}
+
 export async function getMobilePairingStatus(): Promise<MobilePairingStatusResponse> {
     return await fetchJson<MobilePairingStatusResponse>("/mobile/status", {
         method: "GET"
