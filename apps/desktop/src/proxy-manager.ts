@@ -179,18 +179,28 @@ export function buildProxyEnv(): Record<string, string> {
  */
 export function writeProxySetupModule(stateDir: string, vendorDir: string): string {
   const setupPath = join(stateDir, "proxy-setup.cjs");
-  // The global dispatcher captures proxy env vars at creation time, so we can
-  // safely delete them afterward. This is critical because the vendor's
-  // resolveProxyFetchFromEnv() re-reads HTTP(S)_PROXY and, when set, creates a
-  // fetch wrapper that uses undici's named `fetch` export instead of
-  // globalThis.fetch.  undici.fetch does NOT set Content-Type correctly for
-  // FormData (multipart/form-data), which breaks Groq audio transcription
-  // (returns HTTP 400 "Content-Type isn't multipart/form-data").
+  // We pass explicit httpProxy/httpsProxy/noProxy options to EnvHttpProxyAgent
+  // instead of letting it read from process.env. This makes the dispatcher
+  // immune to env var deletion — we capture the proxy URL first, construct the
+  // dispatcher with it, then delete ALL proxy env vars.
   //
-  // By deleting the env vars after the global dispatcher is configured, the
-  // vendor's resolveProxyFetchFromEnv() returns undefined, causing the SSRF
-  // guard to fall back to globalThis.fetch which handles FormData correctly
-  // and still routes through the proxy via the global dispatcher.
+  // Deleting ALL vars (including ALL_PROXY, NO_PROXY) is critical for two reasons:
+  //
+  // 1. The vendor's hasProxyEnvConfigured() (proxy-env.ts) checks ALL_PROXY.
+  //    If it returns true, telegram/fetch.ts replaces our global dispatcher
+  //    with a new EnvHttpProxyAgent that reads from (now-deleted) env vars,
+  //    resulting in no proxy → GFW blocks traffic for Chinese users.
+  //
+  // 2. The vendor's resolveProxyFetchFromEnv() re-reads HTTP(S)_PROXY and,
+  //    when set, creates a fetch wrapper using undici's named `fetch` export
+  //    instead of globalThis.fetch. undici.fetch does NOT set Content-Type
+  //    correctly for FormData (multipart/form-data), breaking Groq audio
+  //    transcription (HTTP 400 "Content-Type isn't multipart/form-data").
+  //
+  // By deleting all env vars, hasProxyEnvConfigured() returns false, so the
+  // vendor preserves our global dispatcher. resolveProxyFetchFromEnv() returns
+  // undefined, so the SSRF guard falls back to globalThis.fetch which handles
+  // FormData correctly and still routes through the proxy via our dispatcher.
   const code = `\
 "use strict";
 const { createRequire } = require("node:module");
@@ -199,14 +209,31 @@ try {
   const vendorDir = ${JSON.stringify(vendorDir)};
   const vendorRequire = createRequire(path.join(vendorDir, "package.json"));
   const { setGlobalDispatcher, EnvHttpProxyAgent } = vendorRequire("undici");
-  setGlobalDispatcher(new EnvHttpProxyAgent());
-  // Delete proxy env vars so vendor code uses globalThis.fetch (not undici.fetch)
-  // which handles FormData/multipart correctly. The global dispatcher already
-  // captures the proxy configuration.
+
+  // Capture proxy config before deleting env vars
+  const proxyUrl = process.env.HTTP_PROXY || process.env.http_proxy || "";
+  const noProxy = process.env.NO_PROXY || process.env.no_proxy || "";
+
+  // Create dispatcher with explicit config — immune to env var deletion
+  if (proxyUrl) {
+    setGlobalDispatcher(new EnvHttpProxyAgent({
+      httpProxy: proxyUrl,
+      httpsProxy: proxyUrl,
+      noProxy: noProxy || undefined,
+    }));
+  }
+
+  // Delete ALL proxy env vars so vendor code (hasProxyEnvConfigured,
+  // resolveProxyFetchFromEnv, telegram/fetch.ts) never sees them and
+  // never replaces our global dispatcher.
   delete process.env.HTTP_PROXY;
   delete process.env.HTTPS_PROXY;
   delete process.env.http_proxy;
   delete process.env.https_proxy;
+  delete process.env.ALL_PROXY;
+  delete process.env.all_proxy;
+  delete process.env.NO_PROXY;
+  delete process.env.no_proxy;
 } catch (_) {}
 `;
   writeFileSync(setupPath, code, "utf-8");
