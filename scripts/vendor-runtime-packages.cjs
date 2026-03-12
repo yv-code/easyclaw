@@ -3,11 +3,8 @@
 // bundling/pruning because they are loaded natively or via runtime resolution.
 
 const EXTERNAL_PACKAGES = [
-  // OpenAI Codex OAuth dynamically loads loginOpenAICodex from pi-ai at
-  // runtime in the Electron main process. Even though model catalog data is
-  // extracted statically below, the package itself must remain available in
-  // packaged builds.
-  "@mariozechner/pi-ai",
+  // OpenAI Codex OAuth no longer keeps the full pi-ai package at runtime.
+  // bundle-vendor-deps extracts the upstream oauth helper into vendor/dist.
 
   // Native modules (contain .node or .dylib binaries)
   "sharp",
@@ -52,9 +49,7 @@ const EXTERNAL_PACKAGES = [
   "@sinclair/typebox/*",
 ];
 
-const RUNTIME_REQUIRED_PACKAGES = [
-  "@mariozechner/pi-ai",
-];
+const RUNTIME_REQUIRED_PACKAGES = [];
 
 function matchesPackagePattern(name, pattern) {
   return name === pattern

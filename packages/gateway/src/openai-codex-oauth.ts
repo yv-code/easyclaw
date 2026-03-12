@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { createRequire } from "node:module";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { createLogger } from "@easyclaw/logger";
 import type { ProviderKeyEntry } from "@easyclaw/core";
 import type { OAuthFlowCallbacks, OAuthFlowResult } from "./oauth-flow.js";
@@ -36,22 +37,34 @@ type LoginFn = (options: {
 }) => Promise<OpenAICodexOAuthCredentials>;
 
 /**
- * Resolve and load loginOpenAICodex from vendor's bundled @mariozechner/pi-ai.
+ * Resolve and load loginOpenAICodex from the extracted vendor helper.
+ * Falls back to the upstream pi-ai subpath in dev if the extracted file
+ * has not been generated yet.
  */
-function loadLoginOpenAICodex(vendorDir?: string): LoginFn {
+async function loadLoginOpenAICodex(vendorDir?: string): Promise<LoginFn> {
   const vendor = resolveVendorDir(vendorDir);
-  const piAiPath = join(vendor, "node_modules", "@mariozechner", "pi-ai");
+  const extractedHelperPath = join(vendor, "dist", "vendor-codex-oauth.js");
+  const fallbackHelperPath = join(
+    vendor,
+    "node_modules",
+    "@mariozechner",
+    "pi-ai",
+    "dist",
+    "utils",
+    "oauth",
+    "openai-codex.js",
+  );
+  const helperPath = existsSync(extractedHelperPath) ? extractedHelperPath : fallbackHelperPath;
 
-  const cjsRequire = createRequire(import.meta.url);
   try {
-    const piAi = cjsRequire(piAiPath) as { loginOpenAICodex?: LoginFn };
-    if (typeof piAi.loginOpenAICodex !== "function") {
-      throw new Error("loginOpenAICodex not exported from pi-ai");
+    const mod = (await import(pathToFileURL(helperPath).href)) as { loginOpenAICodex?: LoginFn };
+    if (typeof mod.loginOpenAICodex !== "function") {
+      throw new Error("loginOpenAICodex not exported from helper");
     }
-    return piAi.loginOpenAICodex;
+    return mod.loginOpenAICodex;
   } catch (err) {
     throw new Error(
-      `OpenAI Codex OAuth requires the pi-ai library bundled in vendor/openclaw. ${err instanceof Error ? err.message : String(err)}`,
+      `OpenAI Codex OAuth helper is unavailable in vendor/openclaw. ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 }
@@ -67,7 +80,7 @@ export async function acquireCodexOAuthToken(
 ): Promise<AcquiredCodexOAuthCredentials> {
   log.info("Starting OpenAI Codex OAuth flow (acquire only)");
 
-  const loginOpenAICodex = loadLoginOpenAICodex(vendorDir);
+  const loginOpenAICodex = await loadLoginOpenAICodex(vendorDir);
 
   const creds = await loginOpenAICodex({
     onAuth: (info) => {
