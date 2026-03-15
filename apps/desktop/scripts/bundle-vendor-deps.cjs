@@ -867,19 +867,43 @@ async function bundleWithEsbuild() {
 // code path in-memory as esbuild loads vendor dist files.
 
 const VENDOR_HEALTH_HANDLER_MARKER = "background health refresh failed";
-const VENDOR_HEALTH_INTERVAL_60S_RE =
-  /(\b[a-zA-Z_$][\w$]*-[a-zA-Z_$][\w$]*\.ts<)6e4(\)\{[^\n]{0,240}background health refresh failed)/g;
-const VENDOR_HEALTH_INTERVAL_300S_RE =
-  /\b[a-zA-Z_$][\w$]*-[a-zA-Z_$][\w$]*\.ts<3e5\)\{[^\n]{0,240}background health refresh failed/g;
+const VENDOR_HEALTH_WINDOW_BEFORE_MARKER = 800;
+
+function patchHealthIntervalNearMarker(contents) {
+  const markerIndex = contents.indexOf(VENDOR_HEALTH_HANDLER_MARKER);
+  if (markerIndex === -1) {
+    return { status: "missing-marker", contents };
+  }
+
+  const windowStart = Math.max(0, markerIndex - VENDOR_HEALTH_WINDOW_BEFORE_MARKER);
+  const windowText = contents.slice(windowStart, markerIndex);
+
+  const tsComparisons = [...windowText.matchAll(/\.ts<([^)\s{;&|,]+)/g)];
+  if (tsComparisons.length === 0) {
+    return { status: "no-ts-comparison", contents };
+  }
+
+  const lastMatch = tsComparisons[tsComparisons.length - 1];
+  const token = lastMatch[1];
+  if (token === "3e5" || token === "300000") {
+    return { status: "already-patched", contents };
+  }
+
+  const tokenStart = windowStart + lastMatch.index + lastMatch[0].lastIndexOf(token);
+  const patchedContents =
+    contents.slice(0, tokenStart) +
+    "3e5" +
+    contents.slice(tokenStart + token.length);
+
+  return { status: "patched", contents: patchedContents };
+}
 
 function createVendorHealthIntervalPatchPlugin() {
   return {
     name: "easyclaw-vendor-health-interval-patch",
     setup(build) {
       let patchedFiles = 0;
-      let totalOccurrences = 0;
       let alreadyPatchedFiles = 0;
-      let alreadyPatchedOccurrences = 0;
 
       build.onLoad({ filter: /\.js$/ }, (args) => {
         if (!args.path.startsWith(distDir)) return null;
@@ -889,28 +913,22 @@ function createVendorHealthIntervalPatchPlugin() {
           return null;
         }
 
-        const occurrences = [...contents.matchAll(VENDOR_HEALTH_INTERVAL_60S_RE)].length;
-        const alreadyPatched = [...contents.matchAll(VENDOR_HEALTH_INTERVAL_300S_RE)].length;
-        if (occurrences === 0) {
-          if (alreadyPatched > 0) {
+        const patchResult = patchHealthIntervalNearMarker(contents);
+        if (patchResult.status === "already-patched") {
             alreadyPatchedFiles++;
-            alreadyPatchedOccurrences += alreadyPatched;
             return null;
-          }
+        }
 
+        if (patchResult.status !== "patched") {
           throw new Error(
-            `Found health handler marker in ${path.basename(args.path)} but could not match either ` +
-              `the 60s or 300s cache interval form. Check vendor/openclaw gateway health handler ` +
-              `output and update the EasyClaw build patch.`,
+            `Found health handler marker in ${path.basename(args.path)} but could not find a ` +
+              `patchable health cache interval token before it (${patchResult.status}). Check ` +
+              `vendor/openclaw gateway health handler output and update the EasyClaw build patch.`,
           );
         }
 
-        contents = contents.replace(
-          VENDOR_HEALTH_INTERVAL_60S_RE,
-          "$13e5$2",
-        );
+        contents = patchResult.contents;
         patchedFiles++;
-        totalOccurrences += occurrences;
 
         return {
           contents,
@@ -920,7 +938,7 @@ function createVendorHealthIntervalPatchPlugin() {
 
       build.onEnd((result) => {
         if (result.errors.length > 0) return;
-        if (totalOccurrences === 0 && alreadyPatchedOccurrences === 0) {
+        if (patchedFiles === 0 && alreadyPatchedFiles === 0) {
           throw new Error(
             `Could not find the vendor health handler marker "${VENDOR_HEALTH_HANDLER_MARKER}" ` +
               `during bundling. Check vendor/openclaw gateway health handler output and update ` +
@@ -928,15 +946,15 @@ function createVendorHealthIntervalPatchPlugin() {
           );
         }
 
-        if (totalOccurrences > 0) {
+        if (patchedFiles > 0) {
           console.log(
             `[bundle-vendor-deps] Patched health cache interval: 60s -> 300s ` +
-              `(${totalOccurrences} occurrence(s) in ${patchedFiles} file(s))`,
+              `(${patchedFiles} file(s))`,
           );
         } else {
           console.log(
             `[bundle-vendor-deps] Health cache interval already at 300s ` +
-              `(${alreadyPatchedOccurrences} occurrence(s) in ${alreadyPatchedFiles} file(s))`,
+              `(${alreadyPatchedFiles} file(s))`,
           );
         }
       });
