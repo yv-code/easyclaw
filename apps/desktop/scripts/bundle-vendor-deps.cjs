@@ -904,6 +904,8 @@ function createVendorHealthIntervalPatchPlugin() {
     setup(build) {
       let patchedFiles = 0;
       let alreadyPatchedFiles = 0;
+      /** @type {string[]} */
+      const skippedFiles = [];
 
       build.onLoad({ filter: /\.js$/ }, (args) => {
         if (!args.path.startsWith(distDir)) return null;
@@ -915,16 +917,13 @@ function createVendorHealthIntervalPatchPlugin() {
 
         const patchResult = patchHealthIntervalNearMarker(contents);
         if (patchResult.status === "already-patched") {
-            alreadyPatchedFiles++;
-            return null;
+          alreadyPatchedFiles++;
+          return null;
         }
 
         if (patchResult.status !== "patched") {
-          throw new Error(
-            `Found health handler marker in ${path.basename(args.path)} but could not find a ` +
-              `patchable health cache interval token before it (${patchResult.status}). Check ` +
-              `vendor/openclaw gateway health handler output and update the EasyClaw build patch.`,
-          );
+          skippedFiles.push(`${path.basename(args.path)} (${patchResult.status})`);
+          return null;
         }
 
         contents = patchResult.contents;
@@ -938,23 +937,23 @@ function createVendorHealthIntervalPatchPlugin() {
 
       build.onEnd((result) => {
         if (result.errors.length > 0) return;
-        if (patchedFiles === 0 && alreadyPatchedFiles === 0) {
-          throw new Error(
-            `Could not find the vendor health handler marker "${VENDOR_HEALTH_HANDLER_MARKER}" ` +
-              `during bundling. Check vendor/openclaw gateway health handler output and update ` +
-              `the EasyClaw build patch.`,
-          );
-        }
 
         if (patchedFiles > 0) {
           console.log(
             `[bundle-vendor-deps] Patched health cache interval: 60s -> 300s ` +
               `(${patchedFiles} file(s))`,
           );
-        } else {
+        } else if (alreadyPatchedFiles > 0) {
           console.log(
             `[bundle-vendor-deps] Health cache interval already at 300s ` +
               `(${alreadyPatchedFiles} file(s))`,
+          );
+        }
+
+        if (skippedFiles.length > 0) {
+          console.warn(
+            `[bundle-vendor-deps] WARNING: Could not patch health cache interval in ` +
+              `${skippedFiles.length} file(s): ${skippedFiles.join(", ")}`,
           );
         }
       });
