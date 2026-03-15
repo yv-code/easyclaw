@@ -98,3 +98,6 @@ export {
 } from "./ports.js";
 
 export { RELAY_MAX_CLIENT_BYTES, RELAY_MAX_CLIENT_MB, RELAY_MAX_PAYLOAD_BYTES } from "./relay.js";
+
+export { stripReasoningTagsFromText } from "./generated/reasoning-tags.js";
+export type { ReasoningTagMode, ReasoningTagTrim } from "./generated/reasoning-tags.js";

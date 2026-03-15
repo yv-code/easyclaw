@@ -10,7 +10,31 @@ on:
   pull_request:
 
 jobs:
+  vendor-boundary:
+    runs-on: ubuntu-latest
+     
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Setup OpenClaw vendor
+        run: ./scripts/setup-vendor.sh
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check vendor boundary (ADR-030)
+        run: node scripts/check-vendor-boundary.mjs
+
+      - name: Check generated artifact drift (ADR-030)
+        run: node scripts/check-vendor-artifact-drift.mjs
+
   test-build-windows:
+    needs: [vendor-boundary]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
@@ -30,14 +54,46 @@ jobs:
       - name: Build packages
         run: pnpm run build
 
-      - name: Test Windows build (no signing)
+      - name: Build and package app (no signing)
         run: |
           cd apps/desktop
-          pnpm run pack
+          pnpm run pack:full
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
+      - name: Verify runtime archive in package
+        shell: bash
+        run: |
+          ARCHIVE_DIR="apps/desktop/release/win-unpacked/resources/runtime-archive"
+          if [ ! -d "$ARCHIVE_DIR" ]; then
+            echo "ERROR: runtime-archive not found at $ARCHIVE_DIR"
+            find apps/desktop/release -maxdepth 4 -type d | head -30
+            exit 1
+          fi
+          if [ ! -f "$ARCHIVE_DIR/openclaw-runtime.tar.gz" ]; then
+            echo "ERROR: openclaw-runtime.tar.gz not found in $ARCHIVE_DIR"
+            ls -la "$ARCHIVE_DIR/"
+            exit 1
+          fi
+          if [ ! -f "$ARCHIVE_DIR/runtime-manifest.json" ]; then
+            echo "ERROR: runtime-manifest.json not found in $ARCHIVE_DIR"
+            ls -la "$ARCHIVE_DIR/"
+            exit 1
+          fi
+          echo "Runtime archive verified in Windows package"
+          ls -la "$ARCHIVE_DIR/"
+
+      - name: Verify packaged app startup (hydrate + gateway ready)
+        run: |
+          node apps/desktop/scripts/prod-model-switch-check.mjs apps/desktop/release/win-unpacked/EasyClaw.exe
+        env:
+          EASYCLAW_PROD_CHECK_INITIAL_BUDGET_SECONDS: 0
+          EASYCLAW_PROD_CHECK_INITIAL_TIMEOUT_MS: 120000
+          EASYCLAW_PROD_CHECK_SWITCH_BUDGET_SECONDS: 0
+          EASYCLAW_PROD_CHECK_SWITCH_TIMEOUT_MS: 90000
+
   test-build-macos:
+    needs: [vendor-boundary]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
@@ -56,9 +112,45 @@ jobs:
       - name: Build packages
         run: pnpm run build
 
-      - name: Test macOS build (no signing)
+      - name: Build and package app (no signing)
         run: |
           cd apps/desktop
-          pnpm run pack
+          pnpm run pack:full
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Verify runtime archive in package
+        run: |
+          ARCHIVE_DIR=$(find apps/desktop/release -path "*/EasyClaw.app/Contents/Resources/runtime-archive" -type d 2>/dev/null | head -1)
+          if [ -z "$ARCHIVE_DIR" ]; then
+            echo "ERROR: runtime-archive not found in macOS .app bundle"
+            find apps/desktop/release -maxdepth 5 -type d | head -30
+            exit 1
+          fi
+          if [ ! -f "$ARCHIVE_DIR/openclaw-runtime.tar.gz" ]; then
+            echo "ERROR: openclaw-runtime.tar.gz not found in $ARCHIVE_DIR"
+            ls -la "$ARCHIVE_DIR/"
+            exit 1
+          fi
+          if [ ! -f "$ARCHIVE_DIR/runtime-manifest.json" ]; then
+            echo "ERROR: runtime-manifest.json not found in $ARCHIVE_DIR"
+            ls -la "$ARCHIVE_DIR/"
+            exit 1
+          fi
+          echo "Runtime archive verified in macOS package"
+          ls -la "$ARCHIVE_DIR/"
+
+      - name: Verify packaged app startup (hydrate + gateway ready)
+        run: |
+          # Find the .app bundle executable
+          APP_PATH=$(find apps/desktop/release -name "EasyClaw.app" -type d 2>/dev/null | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: EasyClaw.app not found in release directory"
+            exit 1
+          fi
+          node apps/desktop/scripts/prod-model-switch-check.mjs "$APP_PATH"
+        env:
+          EASYCLAW_PROD_CHECK_INITIAL_BUDGET_SECONDS: 0
+          EASYCLAW_PROD_CHECK_INITIAL_TIMEOUT_MS: 120000
+          EASYCLAW_PROD_CHECK_SWITCH_BUDGET_SECONDS: 0
+          EASYCLAW_PROD_CHECK_SWITCH_TIMEOUT_MS: 90000

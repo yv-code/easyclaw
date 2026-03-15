@@ -4,7 +4,36 @@ on:
   workflow_dispatch:
 
 jobs:
+  vendor-boundary:
+    runs-on: ubuntu-latest
+     
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Setup OpenClaw vendor
+        run: ./scripts/setup-vendor.sh
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check vendor boundary (ADR-030)
+        run: node scripts/check-vendor-boundary.mjs
+
+      - name: Check generated artifact drift (ADR-030)
+        run: node scripts/check-vendor-artifact-drift.mjs
+
   build-windows:
+    needs: [vendor-boundary]
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -76,6 +105,7 @@ jobs:
           retention-days: 30
 
   build-macos:
+    needs: [vendor-boundary]
     runs-on: macos-latest
     steps:
       - name: Checkout code
@@ -136,6 +166,7 @@ jobs:
           retention-days: 30
 
   build-linux:
+    needs: [vendor-boundary]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

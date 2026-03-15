@@ -12,7 +12,7 @@ import {
   buildExtraProviderConfigs,
   DEFAULT_GATEWAY_PORT,
 } from "./config-writer.js";
-import { OpenClawSchema } from "../../../vendor/openclaw/src/config/zod-schema.js";
+import { OpenClawSchema } from "./generated/openclaw-schema.js";
 
 describe("config-writer", () => {
   let tmpDir: string;

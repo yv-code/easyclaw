@@ -7,7 +7,7 @@ import { createLogger } from "@easyclaw/logger";
 import type { Storage } from "@easyclaw/storage";
 import type { SecretStore } from "@easyclaw/secrets";
 import { resolveOpenClawConfigPath, readExistingConfig, resolveOpenClawStateDir, GatewayRpcClient } from "@easyclaw/gateway";
-import { discoverAllSessions, loadSessionCostSummary } from "../../../vendor/openclaw/src/infra/session-cost-usage.js";
+import { discoverAllSessions, loadSessionCostSummary } from "./services/session-usage.js";
 import { promises as fs } from "node:fs";
 import { resolveMediaBase } from "./media-paths.js";
 import { UsageSnapshotEngine } from "./usage-snapshot-engine.js";

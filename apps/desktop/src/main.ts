@@ -3,6 +3,7 @@ import { createLogger, enableFileLogging } from "@easyclaw/logger";
 import {
   GatewayLauncher,
   GatewayRpcClient,
+  resolveVendorDir,
   resolveVendorEntryPath,
   ensureGatewayConfig,
   resolveOpenClawStateDir,
@@ -49,6 +50,8 @@ import { createAutoUpdater } from "./auto-updater.js";
 import { resetDevicePairing, cleanupGatewayLock, applyAutoLaunch, migrateOldProviderKeys } from "./startup-utils.js";
 import { initTelemetry } from "./telemetry-init.js";
 import { createGatewayConfigBuilder } from "./gateway-config-builder.js";
+import { checkRuntimeReady, hydrateRuntime } from "./runtime-hydrator.js";
+import { createBootstrapWindow } from "./bootstrap-window.js";
 
 const log = createLogger("desktop");
 
@@ -398,9 +401,46 @@ app.whenReady().then(async () => {
 
   // In packaged app, vendor lives in Resources/vendor/openclaw (extraResources).
   // In dev, resolveVendorEntryPath() resolves relative to source via import.meta.url.
-  const vendorDir = app.isPackaged
-    ? join(process.resourcesPath, "vendor", "openclaw")
-    : undefined;
+  let vendorDir = "";
+  if (app.isPackaged) {
+    const archiveDir = join(process.resourcesPath, "runtime-archive");
+    const runtimeBaseDir = join(resolveEasyClawHome(), "runtime");
+    const existingRuntime = checkRuntimeReady(archiveDir, runtimeBaseDir);
+
+    if (existingRuntime) {
+      vendorDir = existingRuntime;
+    } else {
+      const bootstrap = createBootstrapWindow();
+      bootstrap.show();
+
+      let extracted = false;
+      while (!extracted) {
+        try {
+          const result = await hydrateRuntime({
+            archiveDir,
+            runtimeBaseDir,
+            onProgress: (p) => bootstrap.updateProgress(p),
+          });
+          vendorDir = result.runtimeDir;
+          extracted = true;
+          bootstrap.close();
+        } catch (err) {
+          log.error("Runtime hydration failed:", err);
+          const action = await bootstrap.showError(
+            err instanceof Error ? err.message : String(err),
+            true,
+          );
+          if (action !== "retry") {
+            bootstrap.close();
+            app.quit();
+            return;
+          }
+        }
+      }
+    }
+  } else {
+    vendorDir = resolveVendorDir();
+  }
 
   const launcher = new GatewayLauncher({
     entryPath: resolveVendorEntryPath(vendorDir),
@@ -1192,8 +1232,7 @@ app.whenReady().then(async () => {
   // Write the proxy setup CJS module once and build the NODE_OPTIONS string.
   // This is reused by all restart paths (handleSttChange, handlePermissionsChange)
   // so the --require is never accidentally dropped.
-  const resolvedVendorDir = vendorDir ?? join(import.meta.dirname, "..", "..", "..", "vendor", "openclaw");
-  const proxySetupPath = writeProxySetupModule(stateDir, resolvedVendorDir);
+  const proxySetupPath = writeProxySetupModule(stateDir, vendorDir);
   // Quote the path — Windows usernames with spaces break unquoted --require
   const gatewayNodeOptions = `--require "${proxySetupPath.replaceAll("\\", "/")}"`;
 

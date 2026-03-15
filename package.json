@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "turbo run build",
+    "build": "node scripts/generate-vendor-artifacts.mjs && turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "dev": "turbo run dev",
@@ -13,8 +13,9 @@
     "postinstall": "bash scripts/rebuild-native.sh",
     "verify-proxy": "node scripts/verify-proxy-domains.mjs",
     "check:ext-externals": "node scripts/check-extension-externals.mjs",
-    "smoke-test:vendor": "node scripts/smoke-test-vendor.cjs",
-    "verify:bundle": "node scripts/verify-vendor-bundle.cjs"
+    "generate:vendor-artifacts": "node scripts/generate-vendor-artifacts.mjs",
+    "check:vendor-boundary": "node scripts/check-vendor-boundary.mjs",
+    "check:vendor-artifact-drift": "node scripts/check-vendor-artifact-drift.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

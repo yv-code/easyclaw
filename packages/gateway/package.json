@@ -22,6 +22,7 @@
     "@easyclaw/secrets": "workspace:*",
     "@easyclaw/storage": "workspace:*",
     "undici": "^7.21.0",
+    "zod": "^4.3.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
