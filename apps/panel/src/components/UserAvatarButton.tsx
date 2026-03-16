@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../providers/AuthProvider.js";
-import { AuthModal } from "./AuthModal.js";
+import { AuthModal } from "./modals/AuthModal.js";
 
 interface UserAvatarButtonProps {
   onNavigate: (path: string) => void;

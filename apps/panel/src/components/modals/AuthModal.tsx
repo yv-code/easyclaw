@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { useAuth } from "../providers/AuthProvider.js";
+import { useAuth } from "../../providers/AuthProvider.js";
 import { formatError } from "@easyclaw/core";
 import { Modal } from "./Modal.js";
-import { useToast } from "./Toast.js";
+import { useToast } from "../Toast.js";
 
 /** Map known backend error messages to i18n keys. */
 const AUTH_ERROR_MAP: Record<string, string> = {

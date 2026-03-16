@@ -16,8 +16,8 @@ import { AppsPage } from "./pages/AppsPage.js";
 import { OnboardingPage } from "./pages/OnboardingPage.js";
 import { AccountPage } from "./pages/AccountPage.js";
 import { BrowserProfilesPage } from "./pages/BrowserProfilesPage.js";
-import { WhatsNewModal } from "./components/WhatsNewModal.js";
-import { TelemetryConsentModal } from "./components/TelemetryConsentModal.js";
+import { WhatsNewModal } from "./components/modals/WhatsNewModal.js";
+import { TelemetryConsentModal } from "./components/modals/TelemetryConsentModal.js";
 import { fetchSettings, fetchChangelog, trackEvent } from "./api/index.js";
 import type { ChangelogEntry } from "./api/index.js";
 

@@ -1,5 +1,5 @@
 import { BrowserWindow, app, ipcMain } from "electron";
-import type { HydrateProgress } from "./runtime-hydrator.js";
+import type { HydrateProgress } from "../gateway/runtime-hydrator.js";
 
 type Locale = "zh" | "en";
 

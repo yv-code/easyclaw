@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { fetchGatewayInfo, fetchProviderKeys, trackEvent, fetchChatShowAgentEvents, fetchChatPreserveToolEvents, fetchChatCollapseMessages } from "../api/index.js";
 import { formatError } from "@easyclaw/core";
 import { configManager } from "../lib/config-manager.js";
-import { Select } from "../components/Select.js";
+import { Select } from "../components/inputs/Select.js";
 import { GatewayChatClient } from "../lib/gateway-client.js";
 import type { ChatMessage, ChatImage, PendingImage } from "./chat/chat-utils.js";
 import { INITIAL_VISIBLE, PAGE_SIZE, FETCH_BATCH, IMAGE_PLACEHOLDER, cleanMessageText, formatTimestamp, extractText, localizeError, parseRawMessages } from "./chat/chat-utils.js";
@@ -13,14 +13,14 @@ import type { GatewayEvent, GatewayHelloOk } from "../lib/gateway-client.js";
 import { RunTracker } from "../lib/run-tracker.js";
 import { ChatEventBridge } from "../lib/chat-event-bridge.js";
 import { saveImages, restoreImages, clearImages } from "../lib/image-cache.js";
-import { Modal } from "../components/Modal.js";
+import { Modal } from "../components/modals/Modal.js";
 import { useSessionManager } from "./chat/useSessionManager.js";
 import { SessionTabBar } from "./chat/SessionTabBar.js";
 import type { GatewaySessionInfo } from "./chat/SessionTabBar.js";
 import { ChatInputArea } from "./chat/ChatInputArea.js";
-import { ToolSelector } from "../components/ToolSelector.js";
+import { ToolSelector } from "../components/inputs/ToolSelector.js";
 import { useToolRegistry } from "../providers/ToolRegistryProvider.js";
-import "./ChatPage.css";
+import "./chat/ChatPage.css";
 
 export function ChatPage({ onAgentNameChange }: { onAgentNameChange?: (name: string | null) => void }) {
   const { t, i18n } = useTranslation();

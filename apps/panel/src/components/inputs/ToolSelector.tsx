@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { AvailableTool, ToolSelection } from "../api/tool-registry.js";
+import type { AvailableTool, ToolSelection } from "../../api/tool-registry.js";
 import {
   fetchAvailableTools,
   fetchToolSelections,
   saveToolSelections,
-} from "../api/tool-registry.js";
+} from "../../api/tool-registry.js";
 
 interface ToolSelectorProps {
   scopeType: string;

@@ -1,7 +1,7 @@
 import { createLogger } from "@easyclaw/logger";
 import { resolveOpenClawConfigPath, readExistingConfig } from "@easyclaw/gateway";
-import { loadCostUsageSummary, discoverAllSessions, loadSessionCostSummary } from "../services/session-usage.js";
-import type { CostUsageSummary, SessionCostSummary } from "../services/session-usage.js";
+import { loadCostUsageSummary, discoverAllSessions, loadSessionCostSummary } from "../usage/session-usage.js";
+import type { CostUsageSummary, SessionCostSummary } from "../usage/session-usage.js";
 import type { RouteHandler } from "./api-context.js";
 import { sendJson } from "./route-utils.js";
 

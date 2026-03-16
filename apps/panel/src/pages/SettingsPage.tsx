@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchTelemetrySetting, updateTelemetrySetting, trackEvent, fetchAgentSettings, updateAgentSettings, fetchChatShowAgentEvents, updateChatShowAgentEvents, fetchChatPreserveToolEvents, updateChatPreserveToolEvents, fetchChatCollapseMessages, updateChatCollapseMessages, fetchBrowserMode, updateBrowserMode, fetchAutoLaunchSetting, updateAutoLaunchSetting, fetchOpenClawStateDir, updateOpenClawStateDir, resetOpenClawStateDir, fetchPrivacyMode, updatePrivacyMode, fetchSessionStateCdpEnabled, updateSessionStateCdpEnabled } from "../api/index.js";
 import type { OpenClawStateDirInfo } from "../api/index.js";
-import { Select } from "../components/Select.js";
-import { ConfirmDialog } from "../components/ConfirmDialog.js";
+import { Select } from "../components/inputs/Select.js";
+import { ConfirmDialog } from "../components/modals/ConfirmDialog.js";
 
 const DM_SCOPE_OPTIONS = [
   { value: "main", labelKey: "settings.agent.dmScopeMain" },

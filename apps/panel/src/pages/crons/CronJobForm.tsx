@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { Modal } from "../../components/Modal.js";
-import { Select } from "../../components/Select.js";
-import { ToolSelector } from "../../components/ToolSelector.js";
+import { Modal } from "../../components/modals/Modal.js";
+import { Select } from "../../components/inputs/Select.js";
+import { ToolSelector } from "../../components/inputs/ToolSelector.js";
 import { fetchChannelStatus, fetchAllowlist, setRecipientLabel, type ChannelsStatusSnapshot } from "../../api/channels.js";
 import { useToolRegistry } from "../../providers/ToolRegistryProvider.js";
 import type { CronJob, CronJobFormData, ScheduleKind, PayloadKind, EveryUnit, CronWakeMode, CronDeliveryMode, FormErrors } from "./cron-utils.js";

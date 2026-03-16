@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createStorage, type Storage } from "@easyclaw/storage";
-import { syncOwnerAllowFrom, buildOwnerAllowFrom } from "../src/owner-sync.js";
+import { syncOwnerAllowFrom, buildOwnerAllowFrom } from "../src/auth/owner-sync.js";
 
 describe("owner-sync", () => {
   let storage: Storage;

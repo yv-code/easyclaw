@@ -64,7 +64,7 @@ export const handleSettingsRoutes: RouteHandler = async (req, res, url, pathname
   }
 
   if (pathname === "/api/settings/validate-key" && req.method === "POST") {
-    const { validateProviderApiKey } = await import("../provider-validator.js");
+    const { validateProviderApiKey } = await import("../providers/provider-validator.js");
     const body = (await parseBody(req)) as { provider?: string; apiKey?: string; proxyUrl?: string; model?: string };
     if (!body.provider || !body.apiKey) {
       sendJson(res, 400, { valid: false, error: "Missing provider or apiKey" });
@@ -76,7 +76,7 @@ export const handleSettingsRoutes: RouteHandler = async (req, res, url, pathname
   }
 
   if (pathname === "/api/settings/validate-custom-key" && req.method === "POST") {
-    const { validateCustomProviderApiKey } = await import("../provider-validator.js");
+    const { validateCustomProviderApiKey } = await import("../providers/provider-validator.js");
     const body = (await parseBody(req)) as { baseUrl?: string; apiKey?: string; protocol?: string; model?: string };
     if (!body.baseUrl || !body.apiKey || !body.protocol || !body.model) {
       sendJson(res, 400, { valid: false, error: "Missing required fields" });

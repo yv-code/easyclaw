@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Modal } from "../../components/Modal.js";
+import { Modal } from "../../components/modals/Modal.js";
 import type { CronRunLogEntry, CronRunsResult } from "./cron-utils.js";
 import { formatDuration } from "./cron-utils.js";
 

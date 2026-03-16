@@ -4,13 +4,13 @@ import type {
   RegisterPairingInput,
   RegisterPairingResult,
 } from "@easyclaw/core";
-import type { ApiContext } from "./api-routes/api-context.js";
+import type { ApiContext } from "../api-routes/api-context.js";
 import {
   readMobileAllowlist,
   writeMobileAllowlist,
-} from "./api-routes/mobile-chat-routes.js";
+} from "../api-routes/mobile-chat-routes.js";
 import { resolveOpenClawConfigPath } from "@easyclaw/gateway";
-import { syncOwnerAllowFrom } from "./owner-sync.js";
+import { syncOwnerAllowFrom } from "../auth/owner-sync.js";
 
 interface RegisterPairingData extends Record<string, unknown> {
   registerPairing: RegisterPairingResult;

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal } from "./Modal.js";
-import { Select } from "./Select.js";
-import { createChannelAccount, updateChannelAccount, trackEvent } from "../api/index.js";
-import { CHANNEL_SCHEMAS } from "../channel-schemas.js";
+import { Select } from "../inputs/Select.js";
+import { createChannelAccount, updateChannelAccount, trackEvent } from "../../api/index.js";
+import { CHANNEL_SCHEMAS } from "../../lib/channel-schemas.js";
 
 export interface AddChannelAccountModalProps {
   isOpen: boolean;

@@ -10,7 +10,7 @@ import {
   type PairingRequest,
 } from "../../api/channels.js";
 import { fetchMobileDeviceStatus, disconnectMobilePairing, getMobilePairingStatus, type MobileDeviceStatusResponse, type MobilePairingInfo } from "../../api/mobile-chat.js";
-import { ConfirmDialog } from "../../components/ConfirmDialog.js";
+import { ConfirmDialog } from "../../components/modals/ConfirmDialog.js";
 import { StatusBadge, type AccountEntry } from "./channel-defs.jsx";
 
 /** Show last 3 chars of an ID with a copy-to-clipboard button. */

@@ -17,7 +17,7 @@ import {
   resolveAuthProfilePath,
   clearAllAuthProfiles,
 } from "@easyclaw/gateway";
-import { startPanelServer } from "./panel-server.js";
+import { startPanelServer } from "../panel-server.js";
 
 // ---------------------------------------------------------------------------
 // Mock Ollama server

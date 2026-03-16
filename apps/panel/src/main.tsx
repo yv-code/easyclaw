@@ -7,7 +7,6 @@ import "@fontsource/inter/700.css";
 import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "./styles.css";
-import "./index.css";
 import "./i18n/index.js";
 import { App } from "./App.js";
 import { ApolloWrapper } from "./providers/ApolloWrapper.js";

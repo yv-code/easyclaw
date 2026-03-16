@@ -3,8 +3,8 @@ import { promises as fs } from "node:fs";
 import { join } from "node:path";
 import type { MobileGraphQLRequest } from "@easyclaw/core";
 import { resolveOpenClawStateDir, resolveOpenClawConfigPath } from "@easyclaw/gateway";
-import { syncOwnerAllowFrom } from "../owner-sync.js";
-import { executeMobileGraphQL } from "../mobile-graphql.js";
+import { syncOwnerAllowFrom } from "../auth/owner-sync.js";
+import { executeMobileGraphQL } from "../mobile/mobile-graphql.js";
 import type { ApiContext } from "./api-context.js";
 import { parseBody, sendJson } from "./route-utils.js";
 

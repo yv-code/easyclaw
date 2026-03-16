@@ -12,7 +12,7 @@ import {
   trackEvent,
 } from "../api/index.js";
 import type { InstalledSkill } from "../api/index.js";
-import { ConfirmDialog } from "../components/ConfirmDialog.js";
+import { ConfirmDialog } from "../components/modals/ConfirmDialog.js";
 
 const PAGE_SIZE = 12;
 

@@ -14,7 +14,7 @@ import { ThemeToggle } from "../components/ThemeToggle.js";
 import { LangToggle } from "../components/LangToggle.js";
 import { UserAvatarButton } from "../components/UserAvatarButton.js";
 import { useAuth } from "../providers/AuthProvider.js";
-import { AuthModal } from "../components/AuthModal.js";
+import { AuthModal } from "../components/modals/AuthModal.js";
 
 const AUTH_REQUIRED_PATHS = new Set(["/browser-profiles"]);
 

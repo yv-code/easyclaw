@@ -2,7 +2,7 @@ import type { ToolScopeType, ToolSelection } from "@easyclaw/core";
 import { createLogger } from "@easyclaw/logger";
 import type { RouteHandler } from "./api-context.js";
 import { parseBody, sendJson } from "./route-utils.js";
-import { buildToolContext } from "../tool-context-builder.js";
+import { buildToolContext } from "../utils/tool-context-builder.js";
 
 const log = createLogger("panel-server");
 

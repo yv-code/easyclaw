@@ -5680,3 +5680,9 @@ tbody td {
   z-index: 100;
 }
 
+/* Responsive styles for tutorial links */
+@media (max-width: 768px) {
+  .tutorial-link-text {
+    display: none;
+  }
+}

@@ -1,6 +1,6 @@
 import { SUBSCRIPTION_PROVIDER_IDS, API_PROVIDER_IDS, getProviderMeta } from "@easyclaw/core";
 import type { LLMProvider } from "@easyclaw/core";
-import { ProviderSelect } from "./ProviderSelect.js";
+import { ProviderSelect } from "./inputs/ProviderSelect.js";
 import { PricingTable, SubscriptionPricingTable } from "./PricingTable.js";
 import { useProviderForm } from "./provider-setup/use-provider-form.js";
 import { LocalModelForm } from "./provider-setup/LocalModelForm.js";

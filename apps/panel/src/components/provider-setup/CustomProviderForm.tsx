@@ -1,5 +1,5 @@
-import { TagInput } from "../TagInput.js";
-import { Select } from "../Select.js";
+import { TagInput } from "../inputs/TagInput.js";
+import { Select } from "../inputs/Select.js";
 import { ModalityCheckboxGroup } from "./ModalityCheckboxGroup.js";
 import type { ProviderFormState } from "./use-provider-form.js";
 

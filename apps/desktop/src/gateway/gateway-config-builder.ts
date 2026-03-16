@@ -4,8 +4,8 @@ import { resolveModelConfig, LOCAL_PROVIDER_IDS, getProviderMeta, resolveGateway
 import { buildExtraProviderConfigs, writeGatewayConfig } from "@easyclaw/gateway";
 import type { Storage } from "@easyclaw/storage";
 import type { SecretStore } from "@easyclaw/secrets";
-import { buildOwnerAllowFrom } from "./owner-sync.js";
-import type { AuthSessionManager } from "./auth-session.js";
+import { buildOwnerAllowFrom } from "../auth/owner-sync.js";
+import type { AuthSessionManager } from "../auth/auth-session.js";
 
 export interface GatewayConfigDeps {
   storage: Storage;

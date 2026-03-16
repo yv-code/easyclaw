@@ -2,14 +2,14 @@ import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { trackEvent } from "../api/index.js";
 import { ensureToolContext, fetchToolSelections, saveToolSelections } from "../api/tool-registry.js";
-import { Select } from "../components/Select.js";
-import { ConfirmDialog } from "../components/ConfirmDialog.js";
+import { Select } from "../components/inputs/Select.js";
+import { ConfirmDialog } from "../components/modals/ConfirmDialog.js";
 import { useCronManager } from "./crons/useCronManager.js";
 import { CronJobForm, TEMP_CRON_SCOPE_KEY } from "./crons/CronJobForm.js";
 import { CronRunHistory } from "./crons/CronRunHistory.js";
 import type { CronJob, CronListParams } from "./crons/cron-utils.js";
 import { formatSchedule, formatRelativeTime, getTzI18nKey } from "./crons/cron-utils.js";
-import "./CronsPage.css";
+import "./crons/CronsPage.css";
 
 const ENABLED_OPTIONS = [
   { value: "all", label: "All" },

@@ -6,8 +6,8 @@ import {
     getMobilePairingStatus,
     waitForPairing,
     registerPairing,
-} from "../api/mobile-chat.js";
-import { fetchPrivacyMode } from "../api/settings.js";
+} from "../../api/mobile-chat.js";
+import { fetchPrivacyMode } from "../../api/settings.js";
 import { Modal } from "./Modal.js";
 
 const DEFAULT_TTL_MS = 60_000;

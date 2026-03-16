@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync } from "nod
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createStorage, type Storage } from "@easyclaw/storage";
-import { backfillOwnerMigration } from "../src/owner-migration.js";
+import { backfillOwnerMigration } from "../src/auth/owner-migration.js";
 
 describe("backfillOwnerMigration", () => {
   let storage: Storage;

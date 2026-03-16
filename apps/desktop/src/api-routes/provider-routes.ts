@@ -3,7 +3,7 @@ import type { LLMProvider } from "@easyclaw/core";
 import { getDefaultModelForProvider, parseProxyUrl, reconstructProxyUrl, formatError } from "@easyclaw/core";
 import { readFullModelCatalog } from "@easyclaw/gateway";
 import { createLogger } from "@easyclaw/logger";
-import { validateProviderApiKey, validateCustomProviderApiKey, syncActiveKey } from "../provider-validator.js";
+import { validateProviderApiKey, validateCustomProviderApiKey, syncActiveKey } from "../providers/provider-validator.js";
 import type { RouteHandler } from "./api-context.js";
 import { sendJson, parseBody } from "./route-utils.js";
 
@@ -278,7 +278,7 @@ export const handleProviderRoutes: RouteHandler = async (req, res, url, pathname
 
   // --- Local Models ---
   if (pathname === "/api/local-models/detect" && req.method === "GET") {
-    const { detectLocalServers } = await import("../local-model-detector.js");
+    const { detectLocalServers } = await import("../providers/local-model-detector.js");
     const servers = await detectLocalServers();
     sendJson(res, 200, { servers });
     return true;
@@ -290,7 +290,7 @@ export const handleProviderRoutes: RouteHandler = async (req, res, url, pathname
       sendJson(res, 400, { error: "Missing required parameter: baseUrl" });
       return true;
     }
-    const { fetchOllamaModels } = await import("../local-model-fetcher.js");
+    const { fetchOllamaModels } = await import("../providers/local-model-fetcher.js");
     const models = await fetchOllamaModels(baseUrl);
     sendJson(res, 200, { models });
     return true;
@@ -302,7 +302,7 @@ export const handleProviderRoutes: RouteHandler = async (req, res, url, pathname
       sendJson(res, 400, { error: "Missing required field: baseUrl" });
       return true;
     }
-    const { checkHealth } = await import("../local-model-fetcher.js");
+    const { checkHealth } = await import("../providers/local-model-fetcher.js");
     const result = await checkHealth(body.baseUrl);
     sendJson(res, 200, result);
     return true;

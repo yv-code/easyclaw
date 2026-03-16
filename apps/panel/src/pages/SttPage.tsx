@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchSettings, updateSettings, trackEvent } from "../api/index.js";
 import type { SttProvider } from "@easyclaw/core";
-import { Select } from "../components/Select.js";
+import { Select } from "../components/inputs/Select.js";
 
 export function SttPage() {
   const { t, i18n } = useTranslation();

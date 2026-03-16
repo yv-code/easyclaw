@@ -14,7 +14,7 @@
  */
 import type { ToolScopeType, AgentRunToolContext } from "@easyclaw/core";
 import type { Storage } from "@easyclaw/storage";
-import type { AuthSessionManager } from "./auth-session.js";
+import type { AuthSessionManager } from "../auth/auth-session.js";
 
 const RUN_CAPABILITY_CONTEXT_QUERY = `
   query RunCapabilityContext($input: RunCapabilityContextInput!) {

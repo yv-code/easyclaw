@@ -10,7 +10,7 @@ import {
   batchDeleteBrowserProfiles,
   testBrowserProfileProxy,
 } from "../api/browser-profiles.js";
-import { ConfirmDialog } from "../components/ConfirmDialog.js";
+import { ConfirmDialog } from "../components/modals/ConfirmDialog.js";
 
 interface BrowserProfileFormState {
   name: string;

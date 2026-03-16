@@ -4,7 +4,7 @@ import { execFile } from "node:child_process";
 import AdmZip from "adm-zip";
 import { formatError, getApiBaseUrl } from "@easyclaw/core";
 import { createLogger } from "@easyclaw/logger";
-import { initCSBridge, startCS, stopCS, getCSStatus, updateCSConfig } from "../customer-service-bridge.js";
+import { initCSBridge, startCS, stopCS, getCSStatus, updateCSConfig } from "../channels/customer-service-bridge.js";
 import type { RouteHandler } from "./api-context.js";
 import { sendJson, parseBody, proxiedFetch, parseSkillFrontmatter, invalidateSkillsSnapshot, getUserSkillsDir } from "./route-utils.js";
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MobileManager } from "../src/mobile-manager.js";
+import { MobileManager } from "../src/mobile/mobile-manager.js";
 
 describe("MobileManager", () => {
     let mockStorage: any;

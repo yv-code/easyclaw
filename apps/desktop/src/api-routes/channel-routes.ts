@@ -3,8 +3,8 @@ import { resolveOpenClawConfigPath, readExistingConfig, resolveOpenClawStateDir,
 import type { ChannelsStatusSnapshot } from "@easyclaw/core";
 import { promises as fs } from "node:fs";
 import { join } from "node:path";
-import { sendChannelMessage } from "../channel-senders.js";
-import { syncOwnerAllowFrom } from "../owner-sync.js";
+import { sendChannelMessage } from "../channels/channel-senders.js";
+import { syncOwnerAllowFrom } from "../auth/owner-sync.js";
 import type { RouteHandler } from "./api-context.js";
 import { sendJson, parseBody, proxiedFetch } from "./route-utils.js";
 

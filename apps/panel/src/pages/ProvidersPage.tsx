@@ -12,7 +12,7 @@ import {
 } from "../api/index.js";
 import { configManager } from "../lib/config-manager.js";
 import type { ProviderKeyEntry } from "../api/index.js";
-import { ModelSelect } from "../components/ModelSelect.js";
+import { ModelSelect } from "../components/inputs/ModelSelect.js";
 import { ProviderSetupForm } from "../components/ProviderSetupForm.js";
 
 export function ProvidersPage() {

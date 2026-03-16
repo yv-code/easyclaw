@@ -1,4 +1,4 @@
-import type { AuthSessionManager } from "./auth-session.js";
+import type { AuthSessionManager } from "../auth/auth-session.js";
 
 export type PluginPromptMap = Record<string, string>;
 
