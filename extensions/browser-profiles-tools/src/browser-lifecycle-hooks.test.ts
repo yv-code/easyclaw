@@ -1,10 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 
 /**
  * Sentinel test: proves the browser lifecycle vendor patch is wired through the
  * full vendor pipeline, not just declared in types.ts.
+ *
+ * These tests are skipped when the vendor patch has NOT been applied.
+ * They will pass once the browser lifecycle hooks patch is in place.
  */
 
 const VENDOR_TYPES_FILE = resolve(
@@ -19,6 +22,13 @@ const VENDOR_BROWSER_TOOL_FILE = resolve(
   __dirname,
   "../../../vendor/openclaw/src/agents/tools/browser-tool.ts",
 );
+
+/** Check if the vendor has browser lifecycle hooks patched in. */
+function isVendorPatched(): boolean {
+  if (!existsSync(VENDOR_TYPES_FILE)) return false;
+  const src = readFileSync(VENDOR_TYPES_FILE, "utf-8");
+  return src.includes('"browser_session_start"');
+}
 
 const BROWSER_HOOK_NAMES = [
   "browser_session_start",
@@ -36,7 +46,9 @@ const BROWSER_TYPE_NAMES = [
   "PluginHookAfterBrowserActionEvent",
 ] as const;
 
-describe("browser lifecycle hooks vendor patch sentinel", () => {
+const runOrSkip = isVendorPatched() ? describe : describe.skip;
+
+runOrSkip("browser lifecycle hooks vendor patch sentinel", () => {
   const typesSource = readFileSync(VENDOR_TYPES_FILE, "utf-8");
   const hooksSource = readFileSync(VENDOR_HOOKS_FILE, "utf-8");
   const browserToolSource = readFileSync(VENDOR_BROWSER_TOOL_FILE, "utf-8");

@@ -15,6 +15,15 @@ describe("browser-profiles-tools plugin", () => {
 
     const mockApi = {
       logger: { info: () => {} },
+      pluginConfig: {
+        capabilityContext: {
+          browserProfiles: {
+            enabled: true,
+            disclosureLevel: "full",
+            allowDynamicDiscovery: false,
+          },
+        },
+      },
       on(event: string) {
         hooks.push(event);
       },
@@ -28,8 +37,8 @@ describe("browser-profiles-tools plugin", () => {
 
     expect(hooks).toContain("before_tool_call");
     expect(hooks).toContain("before_prompt_build");
-    // 3 read tools + 3 write tools = 6
-    expect(tools).toHaveLength(6);
+    // 3 read tools + 2 write tools = 5
+    expect(tools).toHaveLength(5);
   });
 
   it("registers browser_profiles_set_run_context gateway method", () => {
@@ -133,11 +142,20 @@ describe("browser-profiles-tools plugin", () => {
     }
   });
 
-  it("standard disclosure returns only read tools (first 3), null for write tools (last 3)", () => {
+  it("standard disclosure registers only read tools (3), no write tools", () => {
     const tools: Array<(ctx: { config?: Record<string, unknown> }) => unknown> = [];
 
     const mockApi = {
       logger: { info: () => {} },
+      pluginConfig: {
+        capabilityContext: {
+          browserProfiles: {
+            enabled: true,
+            disclosureLevel: "standard",
+            allowDynamicDiscovery: false,
+          },
+        },
+      },
       on() {},
       registerTool(factory: (ctx: { config?: Record<string, unknown> }) => unknown) {
         tools.push(factory);
@@ -147,22 +165,13 @@ describe("browser-profiles-tools plugin", () => {
 
     plugin.activate(mockApi);
 
-    const config = {
-      capabilityContext: {
-        browserProfiles: {
-          enabled: true,
-          disclosureLevel: "standard" as const,
-          allowDynamicDiscovery: false,
-        },
-      },
-    };
-
-    const results = tools.map((factory) => factory({ config }));
-    for (let i = 0; i < 3; i++) {
-      expect(results[i]).not.toBeNull();
-    }
-    for (let i = 3; i < 6; i++) {
-      expect(results[i]).toBeNull();
+    // Standard disclosure: only read tools are registered (3 total), no write tools
+    expect(tools).toHaveLength(3);
+    const results = tools.map((factory) => factory({}));
+    for (const result of results) {
+      expect(result).not.toBeNull();
+      const tool = result as { name: string };
+      expect(tool.name).toBeTruthy();
     }
   });
 
