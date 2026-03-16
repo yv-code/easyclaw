@@ -3,8 +3,11 @@
 </p>
 
 <p align="center">
-  <a href="README.md">English</a> | 中文
+  <a href="https://www.easy-claw.com">官网</a> · <a href="README.md">English</a> | 中文
 </p>
+
+> **最新正式版请从 [easy-claw.com](https://www.easy-claw.com) 下载。**
+> GitHub 上的代码可能包含未发布的更改，应视为 Staging / 开发版本。
 
 ## 为什么需要 EasyClaw？
 

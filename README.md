@@ -3,8 +3,11 @@
 </p>
 
 <p align="center">
-  English | <a href="README.zh-CN.md">中文</a>
+  <a href="https://www.easy-claw.com">Website</a> · English | <a href="README.zh-CN.md">中文</a>
 </p>
+
+> **Download the latest production release from [easy-claw.com](https://www.easy-claw.com).**
+> The code on GitHub may contain unreleased changes and should be considered a staging/development version.
 
 ## Why EasyClaw?
 
