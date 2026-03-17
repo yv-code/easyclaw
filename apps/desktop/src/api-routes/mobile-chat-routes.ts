@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { resolveOpenClawStateDir, resolveOpenClawConfigPath } from "@rivonclaw/gateway";
 import { syncOwnerAllowFrom } from "../auth/owner-sync.js";
 import { PAIRING_CODE_TTL_MS } from "../mobile/mobile-manager.js";
+import type { MobileGraphQLRequest } from "@rivonclaw/core";
+import { executeMobileGraphQL } from "../mobile/mobile-graphql.js";
 import type { ApiContext } from "./api-context.js";
 import { parseBody, sendJson } from "./route-utils.js";
 
@@ -84,6 +86,14 @@ export async function handleMobileChatRoutes(
     pathname: string,
     ctx: ApiContext
 ): Promise<boolean> {
+    // Mobile GraphQL endpoint (used by Panel's registerPairing)
+    if (pathname === "/api/graphql/mobile" && req.method === "POST") {
+        const body = await parseBody(req) as MobileGraphQLRequest;
+        const result = await executeMobileGraphQL(body, ctx);
+        sendJson(res, 200, result);
+        return true;
+    }
+
     if (!pathname.startsWith("/api/mobile/")) {
         return false; // Not handled here
     }

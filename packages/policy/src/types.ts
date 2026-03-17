@@ -1,15 +1,15 @@
-/** Event passed to before_prompt_build hook. */
-export interface PromptBuildEvent {
-  /** The user's prompt text. */
-  prompt: string;
+/** Context passed to before_agent_start hook. */
+export interface AgentStartContext {
+  /** Existing prepended context for the agent run. */
+  prependContext: string;
   /** Session messages prepared for this run. */
   messages?: unknown[];
 }
 
-/** Result from before_prompt_build hook. */
-export interface PromptBuildResult {
-  /** Prepended to system prompt (invisible to user). */
-  prependSystemContext?: string;
+/** Result from before_agent_start hook. */
+export interface AgentStartResult {
+  /** Content to prepend to the agent's system context. */
+  prependContext: string;
 }
 
 /** Context passed to before_tool_call hook. */
@@ -47,8 +47,8 @@ export interface GuardProvider {
 /** OpenClaw plugin registration API. */
 export interface OpenClawPluginAPI {
   registerHook(
-    hookName: "before_prompt_build",
-    handler: (event: PromptBuildEvent) => PromptBuildResult,
+    hookName: "before_agent_start",
+    handler: (ctx: AgentStartContext) => AgentStartResult,
   ): void;
   registerHook(
     hookName: "before_tool_call",

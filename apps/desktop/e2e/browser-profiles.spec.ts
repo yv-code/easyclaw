@@ -34,7 +34,7 @@ test.describe("Browser Profiles — Auth Gating", () => {
     const urlBefore = window.url();
 
     // Click the Browsers nav button
-    const navBtn = window.locator(".nav-btn", { hasText: "Browsers" });
+    const navBtn = window.locator(".nav-btn", { hasText: "Multi Browser" });
     await navBtn.click({ timeout: 15_000 });
 
     // Auth modal should appear (contains login/register form)

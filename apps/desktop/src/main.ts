@@ -52,6 +52,7 @@ import { createAutoUpdater } from "./utils/auto-updater.js";
 import { resetDevicePairing, cleanupGatewayLock, applyAutoLaunch } from "./gateway/startup-utils.js";
 import { initTelemetry } from "./utils/telemetry-init.js";
 import { createGatewayConfigBuilder } from "./gateway/gateway-config-builder.js";
+import { fetchPluginPrompts } from "./utils/plugin-prompt-fetcher.js";
 import { AuthSessionManager } from "./auth/auth-session.js";
 import { createSessionStateStack, type SessionStateStack } from "./browser-profiles/session-state-wiring.js";
 import { createCloudBackupProvider } from "./browser-profiles/session-state/backup-provider.js";
@@ -361,6 +362,19 @@ app.whenReady().then(async () => {
     process.env.OPENCLAW_STATE_DIR = stateDirOverride;
   }
 
+  // --- System Dependencies Provisioning ---
+  // On first launch, check and optionally install missing system dependencies
+  // (git, python, node, uv) that the agent needs to function properly.
+  // Runs in the background so the app starts immediately.
+  const depsProvisioned = storage.settings.get("deps_provisioned");
+  if (!depsProvisioned) {
+    import("./deps-provisioner/index.js").then(({ runDepsProvisioner }) => {
+      runDepsProvisioner({ storage }).catch((err: unknown) => {
+        log.error("Deps provisioner failed:", err);
+      });
+    });
+  }
+
   // --- Auto-updater state (updater instance created after tray) ---
   let currentState: GatewayState = "stopped";
   // updater is initialized after tray creation (search for "createAutoUpdater" below)
@@ -439,6 +453,13 @@ app.whenReady().then(async () => {
   // One-time backfill: ensure existing allowFrom entries have channel_recipients rows as owners
   const { backfillOwnerMigration } = await import("./auth/owner-migration.js");
   await backfillOwnerMigration(storage, stateDir, configPath);
+
+  // Fetch server-managed plugin prompts before first config build.
+  // Kept as a separate variable (not in configDeps) — prompts are pushed
+  // to the plugin via RPC, never written to the gateway config file.
+  let pluginPrompts: Record<string, string> = authSession?.getAccessToken()
+    ? await fetchPluginPrompts(authSession)
+    : {};
 
   // Build gateway config helpers (closures bound to current settings)
   const { buildFullGatewayConfig } = createGatewayConfigBuilder({
@@ -594,6 +615,15 @@ app.whenReady().then(async () => {
               }
             })
             .catch((e: unknown) => log.warn("Failed to list cron jobs for tool context push:", e));
+        }
+
+        // Push plugin prompts via RPC (in-memory, not written to config file).
+        // Each plugin registers "{pluginId}_set_prompt_addendum" gateway method;
+        // we iterate the map so new plugins need zero changes in main.ts.
+        for (const [pluginId, prompt] of Object.entries(pluginPrompts)) {
+          const method = `${pluginId.replace(/-/g, "_")}_set_prompt_addendum`;
+          rpcClient?.request(method, { prompt })
+            .catch((e: unknown) => log.debug(`Failed to push prompt for ${pluginId}:`, e));
         }
 
         // Push locally-stored cookies for managed profiles to the gateway plugin
@@ -1394,6 +1424,22 @@ app.whenReady().then(async () => {
               });
             });
         });
+    },
+    onAuthChange: () => {
+      // Re-fetch server-managed plugin prompts and push via RPC (in-memory).
+      (async () => {
+        if (authSession?.getAccessToken()) {
+          pluginPrompts = await fetchPluginPrompts(authSession);
+        } else {
+          pluginPrompts = {};
+        }
+        // Push updated prompts to all plugins via RPC (in-memory)
+        for (const [pluginId, prompt] of Object.entries(pluginPrompts)) {
+          const method = `${pluginId.replace(/-/g, "_")}_set_prompt_addendum`;
+          rpcClient?.request(method, { prompt })
+            .catch((e: unknown) => log.debug(`Failed to push prompt for ${pluginId} on auth change:`, e));
+        }
+      })().catch((e: unknown) => log.warn("onAuthChange prompt refresh failed:", e));
     },
     onAutoLaunchChange: (enabled: boolean) => {
       applyAutoLaunch(enabled);
