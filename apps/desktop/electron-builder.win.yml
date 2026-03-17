@@ -5,7 +5,7 @@
 extends: electron-builder.yml
 
 win:
-  icon: build/icon.ico
+  icon: build/icon.png
   # Code signing via environment variables:
   #   CSC_LINK  — path or URL to the .pfx / .p12 certificate
   #   CSC_KEY_PASSWORD — certificate password
