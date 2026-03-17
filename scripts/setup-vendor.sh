@@ -24,7 +24,10 @@ if $CLONE_ONLY; then
   exit 0
 fi
 
-echo 'node-linker=hoisted' > .npmrc
+# Use pnpm's default isolated linker (symlinks into .pnpm/).
+# Previously used node-linker=hoisted to avoid Windows MAX_PATH issues,
+# but this caused incomplete archives (hardlinks not fully copied by tar-fs)
+# and missing dependencies on macOS/Windows CI builds.
 pnpm install --no-frozen-lockfile
 pnpm run build
 
